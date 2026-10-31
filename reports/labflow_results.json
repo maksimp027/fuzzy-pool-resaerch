@@ -1,0 +1,1274 @@
+{
+  "gradcheck": [
+    {
+      "name": "Base: GraphSAGE Linear Operator",
+      "passed": true,
+      "forward_max_err": 0.0,
+      "autograd_grad_max_err": 0.0,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Base: Sparse GraphSAGE Linear Operator",
+      "passed": true,
+      "forward_max_err": 0.0,
+      "autograd_grad_max_err": 0.0,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Membership 1: Temperature Softmax",
+      "passed": true,
+      "forward_max_err": 0.0,
+      "autograd_grad_max_err": 6.071532165918825e-17,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Membership 2: Anisotropic Logistic-Sigmoid",
+      "passed": true,
+      "forward_max_err": 0.0,
+      "autograd_grad_max_err": 1.1102230246251565e-16,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Membership 3: Gaussian Prototype (RBF)",
+      "passed": true,
+      "forward_max_err": 0.0,
+      "autograd_grad_max_err": 2.220446049250313e-16,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 1: DiffPool (X_new, A_new, L_LP, L_ent)",
+      "passed": true,
+      "forward_max_err": 0.0,
+      "autograd_grad_max_err": 8.881784197001252e-16,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 2: MinCutPool (X_new, A_new, L_cut, L_orth)",
+      "passed": true,
+      "forward_max_err": 0.0,
+      "autograd_grad_max_err": 4.440892098500626e-16,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 3: DMoN (X_new, A_new, L_mod, L_collapse)",
+      "passed": true,
+      "forward_max_err": 9.367506770274758e-17,
+      "autograd_grad_max_err": 2.220446049250313e-16,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 1-Sparse: DiffPool True Sparse Frobenius Identity",
+      "passed": true,
+      "forward_max_err": 2.220446049250313e-16,
+      "autograd_grad_max_err": 8.881784197001252e-16,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 2-Sparse: MinCutPool True Sparse Operator",
+      "passed": true,
+      "forward_max_err": 0.0,
+      "autograd_grad_max_err": 4.440892098500626e-16,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 3-Sparse: DMoN True Sparse Chung-Lu Operator",
+      "passed": true,
+      "forward_max_err": 5.898059818321144e-17,
+      "autograd_grad_max_err": 4.440892098500626e-16,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 4: Zadeh-Godel (max-min)",
+      "passed": true,
+      "forward_max_err": 0.0,
+      "autograd_grad_max_err": 0.0,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 5: Goguen (max-product)",
+      "passed": true,
+      "forward_max_err": 1.1102230246251565e-16,
+      "autograd_grad_max_err": 2.220446049250313e-16,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 6: Lukasiewicz (max-T_L, [0,1]-clamped, learnable eta_IJ)",
+      "passed": true,
+      "forward_max_err": 4.440892098500626e-16,
+      "autograd_grad_max_err": 2.7755575615628914e-17,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 6-Smooth: Lukasiewicz Softplus Window (tau=0.15)",
+      "passed": true,
+      "forward_max_err": 4.440892098500626e-16,
+      "autograd_grad_max_err": 4.440892098500626e-16,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 7A: Hamacher-Einstein (scalar gamma)",
+      "passed": true,
+      "forward_max_err": 4.440892098500626e-16,
+      "autograd_grad_max_err": 8.881784197001252e-16,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 7B: Hamacher (symmetric matrix Gamma_IJ)",
+      "passed": true,
+      "forward_max_err": 4.440892098500626e-16,
+      "autograd_grad_max_err": 6.661338147750939e-16,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 8A: Schweizer-Sklar (p = -q)",
+      "passed": true,
+      "forward_max_err": 1.1102230246251565e-16,
+      "autograd_grad_max_err": 3.3306690738754696e-16,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 8B: Dombi (learnable lambda)",
+      "passed": true,
+      "forward_max_err": 1.1102230246251565e-16,
+      "autograd_grad_max_err": 3.3306690738754696e-16,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 9A: Boltzmann Smooth FuzzyPool (Global Edge)",
+      "passed": true,
+      "forward_max_err": 0.0,
+      "autograd_grad_max_err": 1.1102230246251565e-16,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 9A-Adaptive: Boltzmann Log-M Scaled FuzzyPool",
+      "passed": true,
+      "forward_max_err": 0.0,
+      "autograd_grad_max_err": 2.220446049250313e-16,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 9B: Boltzmann Smooth FuzzyPool (Two-Step)",
+      "passed": true,
+      "forward_max_err": 5.551115123125783e-17,
+      "autograd_grad_max_err": 3.3306690738754696e-16,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 10: Probabilistic Sum FuzzyPool",
+      "passed": true,
+      "forward_max_err": 0.0,
+      "autograd_grad_max_err": 8.326672684688674e-17,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 10-Norm: Mean-Field Scale-Normalized ProbSum",
+      "passed": true,
+      "forward_max_err": 0.0,
+      "autograd_grad_max_err": 5.551115123125783e-17,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 11C: Bandler-Kohout (Reichenbach)",
+      "passed": true,
+      "forward_max_err": 1.1102230246251565e-16,
+      "autograd_grad_max_err": 2.220446049250313e-16,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 11A: Bandler-Kohout (Lukasiewicz)",
+      "passed": true,
+      "forward_max_err": 2.7755575615628914e-16,
+      "autograd_grad_max_err": 1.1102230246251565e-16,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 11B: Bandler-Kohout (Kleene-Dienes)",
+      "passed": true,
+      "forward_max_err": 0.0,
+      "autograd_grad_max_err": 0.0,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 11A-Sparse: Matrix-Free Sparse MEX Bandler-Kohout (lukasiewicz)",
+      "passed": true,
+      "forward_max_err": 3.3306690738754696e-16,
+      "autograd_grad_max_err": 1.1102230246251565e-16,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 11B-Sparse: Matrix-Free Sparse MEX Bandler-Kohout (kleene_dienes)",
+      "passed": true,
+      "forward_max_err": 0.0,
+      "autograd_grad_max_err": 0.0,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 11C-Sparse: Matrix-Free Sparse MEX Bandler-Kohout (reichenbach)",
+      "passed": true,
+      "forward_max_err": 1.1102230246251565e-16,
+      "autograd_grad_max_err": 2.220446049250313e-16,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 12: Power Centroid Defuzzification (COG / FCM)",
+      "passed": true,
+      "forward_max_err": 0.0,
+      "autograd_grad_max_err": 3.3306690738754696e-16,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 13A: Bipolar Supremal Feature Pooling",
+      "passed": true,
+      "forward_max_err": 0.0,
+      "autograd_grad_max_err": 0.0,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "Method 13B: Discrete Fuzzy Choquet Integral Pooling",
+      "passed": true,
+      "forward_max_err": 0.0,
+      "autograd_grad_max_err": 2.220446049250313e-16,
+      "numerical_gradcheck": true,
+      "note": ""
+    },
+    {
+      "name": "End-to-End Layer [M1]: diffpool",
+      "passed": true,
+      "forward_max_err": 4.440892098500626e-16,
+      "autograd_grad_max_err": 8.465450562766819e-16,
+      "numerical_gradcheck": true,
+      "note": "Dense + True Sparse GraphData parameter chain rule verified against PyTorch reference"
+    },
+    {
+      "name": "End-to-End Layer [M2]: mincut",
+      "passed": true,
+      "forward_max_err": 2.220446049250313e-16,
+      "autograd_grad_max_err": 3.677613769070831e-16,
+      "numerical_gradcheck": true,
+      "note": "Dense + True Sparse GraphData parameter chain rule verified against PyTorch reference"
+    },
+    {
+      "name": "End-to-End Layer [M3]: dmon",
+      "passed": true,
+      "forward_max_err": 1.1102230246251565e-16,
+      "autograd_grad_max_err": 2.220446049250313e-16,
+      "numerical_gradcheck": true,
+      "note": "Dense + True Sparse GraphData parameter chain rule verified against PyTorch reference"
+    },
+    {
+      "name": "End-to-End Layer [M4]: zadeh",
+      "passed": true,
+      "forward_max_err": 9.020562075079397e-17,
+      "autograd_grad_max_err": 2.220446049250313e-16,
+      "numerical_gradcheck": true,
+      "note": "Dense + True Sparse GraphData parameter chain rule verified against PyTorch reference"
+    },
+    {
+      "name": "End-to-End Layer [M4-RBF]: zadeh_rbf",
+      "passed": true,
+      "forward_max_err": 1.1102230246251565e-16,
+      "autograd_grad_max_err": 4.440892098500626e-16,
+      "numerical_gradcheck": true,
+      "note": "Dense + True Sparse GraphData parameter chain rule verified against PyTorch reference"
+    },
+    {
+      "name": "End-to-End Layer [M5]: goguen",
+      "passed": true,
+      "forward_max_err": 9.020562075079397e-17,
+      "autograd_grad_max_err": 2.220446049250313e-16,
+      "numerical_gradcheck": true,
+      "note": "Dense + True Sparse GraphData parameter chain rule verified against PyTorch reference"
+    },
+    {
+      "name": "End-to-End Layer [M6]: lukasiewicz",
+      "passed": true,
+      "forward_max_err": 4.440892098500626e-16,
+      "autograd_grad_max_err": 2.220446049250313e-16,
+      "numerical_gradcheck": true,
+      "note": "Dense + True Sparse GraphData parameter chain rule verified against PyTorch reference"
+    },
+    {
+      "name": "End-to-End Layer [M6-Sm]: lukasiewicz_smooth",
+      "passed": true,
+      "forward_max_err": 3.3306690738754696e-16,
+      "autograd_grad_max_err": 4.440892098500626e-16,
+      "numerical_gradcheck": true,
+      "note": "Dense + True Sparse GraphData parameter chain rule verified against PyTorch reference"
+    },
+    {
+      "name": "End-to-End Layer [M7]: hamacher",
+      "passed": true,
+      "forward_max_err": 1.1102230246251565e-16,
+      "autograd_grad_max_err": 4.996003610813204e-16,
+      "numerical_gradcheck": true,
+      "note": "Dense + True Sparse GraphData parameter chain rule verified against PyTorch reference"
+    },
+    {
+      "name": "End-to-End Layer [M7-Ein]: einstein",
+      "passed": true,
+      "forward_max_err": 2.220446049250313e-16,
+      "autograd_grad_max_err": 2.7755575615628914e-16,
+      "numerical_gradcheck": true,
+      "note": "Dense + True Sparse GraphData parameter chain rule verified against PyTorch reference"
+    },
+    {
+      "name": "End-to-End Layer [M8A]: schweizer_sklar",
+      "passed": true,
+      "forward_max_err": 1.1102230246251565e-16,
+      "autograd_grad_max_err": 3.3306690738754696e-16,
+      "numerical_gradcheck": true,
+      "note": "Dense + True Sparse GraphData parameter chain rule verified against PyTorch reference"
+    },
+    {
+      "name": "End-to-End Layer [M8B]: dombi",
+      "passed": true,
+      "forward_max_err": 1.1102230246251565e-16,
+      "autograd_grad_max_err": 4.440892098500626e-16,
+      "numerical_gradcheck": true,
+      "note": "Dense + True Sparse GraphData parameter chain rule verified against PyTorch reference"
+    },
+    {
+      "name": "End-to-End Layer [M9A]: boltzmann",
+      "passed": true,
+      "forward_max_err": 9.020562075079397e-17,
+      "autograd_grad_max_err": 2.220446049250313e-16,
+      "numerical_gradcheck": true,
+      "note": "Dense + True Sparse GraphData parameter chain rule verified against PyTorch reference"
+    },
+    {
+      "name": "End-to-End Layer [M9-Ad]: boltzmann_adaptive",
+      "passed": true,
+      "forward_max_err": 9.020562075079397e-17,
+      "autograd_grad_max_err": 2.220446049250313e-16,
+      "numerical_gradcheck": true,
+      "note": "Dense + True Sparse GraphData parameter chain rule verified against PyTorch reference"
+    },
+    {
+      "name": "End-to-End Layer [M9B]: boltzmann_two_step",
+      "passed": true,
+      "forward_max_err": 9.020562075079397e-17,
+      "autograd_grad_max_err": 2.220446049250313e-16,
+      "numerical_gradcheck": true,
+      "note": "Dense + True Sparse GraphData parameter chain rule verified against PyTorch reference"
+    },
+    {
+      "name": "End-to-End Layer [M10]: probsum",
+      "passed": true,
+      "forward_max_err": 9.020562075079397e-17,
+      "autograd_grad_max_err": 3.3306690738754696e-16,
+      "numerical_gradcheck": true,
+      "note": "Dense + True Sparse GraphData parameter chain rule verified against PyTorch reference"
+    },
+    {
+      "name": "End-to-End Layer [M10-Nm]: probsum_norm",
+      "passed": true,
+      "forward_max_err": 1.1102230246251565e-16,
+      "autograd_grad_max_err": 2.220446049250313e-16,
+      "numerical_gradcheck": true,
+      "note": "Dense + True Sparse GraphData parameter chain rule verified against PyTorch reference"
+    },
+    {
+      "name": "End-to-End Layer [M11A]: bk_lukasiewicz",
+      "passed": true,
+      "forward_max_err": 2.220446049250313e-16,
+      "autograd_grad_max_err": 4.440892098500626e-16,
+      "numerical_gradcheck": true,
+      "note": "Dense + True Sparse GraphData parameter chain rule verified against PyTorch reference"
+    },
+    {
+      "name": "End-to-End Layer [M11B]: bk_kleene_dienes",
+      "passed": true,
+      "forward_max_err": 2.7755575615628914e-17,
+      "autograd_grad_max_err": 2.220446049250313e-16,
+      "numerical_gradcheck": true,
+      "note": "Dense + True Sparse GraphData parameter chain rule verified against PyTorch reference"
+    },
+    {
+      "name": "End-to-End Layer [M11C]: bk_reichenbach",
+      "passed": true,
+      "forward_max_err": 2.7755575615628914e-17,
+      "autograd_grad_max_err": 4.440892098500626e-16,
+      "numerical_gradcheck": true,
+      "note": "Dense + True Sparse GraphData parameter chain rule verified against PyTorch reference"
+    },
+    {
+      "name": "End-to-End Layer [M13A]: goguen_bipolar",
+      "passed": true,
+      "forward_max_err": 2.220446049250313e-16,
+      "autograd_grad_max_err": 2.220446049250313e-16,
+      "numerical_gradcheck": true,
+      "note": "Dense + True Sparse GraphData parameter chain rule verified against PyTorch reference"
+    },
+    {
+      "name": "End-to-End Layer [M13B]: goguen_choquet",
+      "passed": true,
+      "forward_max_err": 1.1102230246251565e-16,
+      "autograd_grad_max_err": 4.440892098500626e-16,
+      "numerical_gradcheck": true,
+      "note": "Dense + True Sparse GraphData parameter chain rule verified against PyTorch reference"
+    }
+  ],
+  "sparse_equivalence": [
+    {
+      "name": "Base GNN (GraphSAGE): true sparse O(M F) vs dense O(N^2 F) H & Z",
+      "passed": true,
+      "max_abs_diff": 2.6645352591003757e-15,
+      "tolerance": 1e-12
+    },
+    {
+      "name": "Method 1 (DiffPool): true sparse Frobenius trace identity vs dense ||A - S S^T||_F^2",
+      "passed": true,
+      "max_abs_diff": 3.552713678800501e-15,
+      "tolerance": 1e-12
+    },
+    {
+      "name": "Method 2 (MinCutPool): true sparse O(M K) vs dense spectral cut & A_new",
+      "passed": true,
+      "max_abs_diff": 1.6653345369377348e-16,
+      "tolerance": 1e-12
+    },
+    {
+      "name": "Method 3 (DMoN): true sparse Chung-Lu modularity vs dense DMoN",
+      "passed": true,
+      "max_abs_diff": 1.6653345369377348e-16,
+      "tolerance": 1e-12
+    },
+    {
+      "name": "Method 4 (Zadeh): 2-step sparse vs dense O(N^2 K^2) max-min",
+      "passed": true,
+      "max_abs_diff": 0.0,
+      "tolerance": 1e-12
+    },
+    {
+      "name": "Method 5 (Goguen): 2-step sparse vs dense O(N^2 K^2) max-product",
+      "passed": true,
+      "max_abs_diff": 1.1102230246251565e-16,
+      "tolerance": 1e-12
+    },
+    {
+      "name": "Method 6A (Lukasiewicz eta=2): generalized 2-step vs classical 2-step formula",
+      "passed": true,
+      "max_abs_diff": 2.220446049250313e-16,
+      "tolerance": 1e-12
+    },
+    {
+      "name": "Method 6B (Lukasiewicz eta=2): classical 2-step vs direct edge max",
+      "passed": true,
+      "max_abs_diff": 4.440892098500626e-16,
+      "tolerance": 1e-12
+    },
+    {
+      "name": "Method 6C (Lukasiewicz [0,1]-clamped learnable eta_IJ): 2-step sparse vs direct edge O(M K^2)",
+      "passed": true,
+      "max_abs_diff": 0.0,
+      "tolerance": 1e-12
+    },
+    {
+      "name": "Method 6D (Lukasiewicz smooth Softplus window): 2-step sparse vs direct edge O(M K^2)",
+      "passed": true,
+      "max_abs_diff": 2.220446049250313e-16,
+      "tolerance": 1e-12
+    },
+    {
+      "name": "Method 7A (Einstein gamma=2): 2-step sparse vs closed-form ternary equation",
+      "passed": true,
+      "max_abs_diff": 9.992007221626409e-16,
+      "tolerance": 1e-12
+    },
+    {
+      "name": "Method 7B (Hamacher gamma=0.65): 2-step sparse vs closed-form ternary equation",
+      "passed": true,
+      "max_abs_diff": 2.220446049250313e-16,
+      "tolerance": 1e-12
+    },
+    {
+      "name": "Method 8A (Schweizer-Sklar): 2-step log-domain generator vs direct edge formula",
+      "passed": true,
+      "max_abs_diff": 1.1102230246251565e-16,
+      "tolerance": 1e-12
+    },
+    {
+      "name": "Method 8B (Dombi): 2-step log-domain generator vs direct edge formula",
+      "passed": true,
+      "max_abs_diff": 0.0,
+      "tolerance": 1e-12
+    },
+    {
+      "name": "Method 11 (Bandler-Kohout lukasiewicz): dense 2-step complement vs universal min_(i,j) implication",
+      "passed": true,
+      "max_abs_diff": 3.3306690738754696e-16,
+      "tolerance": 1e-12
+    },
+    {
+      "name": "Method 11-Sparse (Bandler-Kohout lukasiewicz): Matrix-Free MEX sparse O((M+N)K log MK) vs dense reference",
+      "passed": true,
+      "max_abs_diff": 3.3306690738754696e-16,
+      "tolerance": 1e-12
+    },
+    {
+      "name": "Method 11 (Bandler-Kohout kleene_dienes): dense 2-step complement vs universal min_(i,j) implication",
+      "passed": true,
+      "max_abs_diff": 0.0,
+      "tolerance": 1e-12
+    },
+    {
+      "name": "Method 11-Sparse (Bandler-Kohout kleene_dienes): Matrix-Free MEX sparse O((M+N)K log MK) vs dense reference",
+      "passed": true,
+      "max_abs_diff": 0.0,
+      "tolerance": 1e-12
+    },
+    {
+      "name": "Method 11 (Bandler-Kohout reichenbach): dense 2-step complement vs universal min_(i,j) implication",
+      "passed": true,
+      "max_abs_diff": 0.0,
+      "tolerance": 1e-12
+    },
+    {
+      "name": "Method 11-Sparse (Bandler-Kohout reichenbach): Matrix-Free MEX sparse O((M+N)K log MK) vs dense reference",
+      "passed": true,
+      "max_abs_diff": 0.0,
+      "tolerance": 1e-12
+    }
+  ],
+  "invariants": [
+    {
+      "code": "INV-01",
+      "title": "DiffPool: Edge Mass Conservation Law and [0, 1] Scale Breakdown",
+      "passed": true,
+      "measured_value": 0.0,
+      "expected_bound_or_target": "|sum(A_new) - sum(A)| < 1e-10, max(A_new) > 1",
+      "details": "sum(A)=187.3285, sum(A_new)=187.3285, max(A_new)=25.8497 (> 1.0)"
+    },
+    {
+      "code": "INV-02",
+      "title": "MinCutPool: Self-loop Annihilation and Spectral Bounds L_cut in [-1, 0], L_orth in [0, sqrt(2)]",
+      "passed": true,
+      "measured_value": -0.7396132741214144,
+      "expected_bound_or_target": "diag==0, L_cut in [-1,0], L_orth in [0, 1.4142]",
+      "details": "max|diag|=0.00e+00, L_cut=-0.7396, L_orth=0.6957"
+    },
+    {
+      "code": "INV-03",
+      "title": "DMoN: Equivalence of Rank-1 Chung-Lu Modularity Matrix Decomposition",
+      "passed": true,
+      "measured_value": 7.24247051220317e-17,
+      "expected_bound_or_target": "|Q_rank1 - Q_dense_B| < 1e-12, L_collapse >= 0",
+      "details": "|dQ|=7.24e-17, Q=0.0023, L_collapse=0.0059"
+    },
+    {
+      "code": "INV-04",
+      "title": "Zadeh-Godel FuzzyPool: [0, 1] Closure and Height Identity A_new(I,I) = height(S_{.I})",
+      "passed": true,
+      "measured_value": 0.0,
+      "expected_bound_or_target": "|A_new(I,I) - max_i S_{iI}| < 1e-12, A_new in [0, 1]",
+      "details": "max|diag - height|=0.00e+00, range=[0.774, 0.864]"
+    },
+    {
+      "code": "INV-05",
+      "title": "Zadeh-Godel FuzzyPool: Edge Bottleneck Gradient Masking Effect",
+      "passed": true,
+      "measured_value": 0.0,
+      "expected_bound_or_target": "||dA_new(0,1)/dS|| == 0 when A_{i*j*} < min(S_{i*I}, S_{j*J})",
+      "details": "A_new(0,1)=0.250 == A_01=0.25, max|dA_new/dS|=0.00e+00"
+    },
+    {
+      "code": "INV-06",
+      "title": "Goguen FuzzyPool: Tropical Logarithmic Isomorphism to Shortest Path Problem",
+      "passed": true,
+      "measured_value": 1.1102230246251565e-16,
+      "expected_bound_or_target": "|-ln A_new - min_e(-ln S_i - ln A_ij - ln S_j)| < 1e-12",
+      "details": "max tropical shortest-path discrepancy = 1.11e-16"
+    },
+    {
+      "code": "INV-07",
+      "title": "Goguen FuzzyPool: Hebbian Scaling of Gradient on Both Incident Nodes of Winner Edge",
+      "passed": true,
+      "measured_value": 0.0,
+      "expected_bound_or_target": "dA_new/dS_{0,0} = A_{01} S_{1,1}, dA_new/dS_{1,1} = S_{0,0} A_{01}",
+      "details": "grad_S[0,0]=0.1750 ( != 0 unlike Zadeh! ), grad_S[1,1]=0.2000"
+    },
+    {
+      "code": "INV-08",
+      "title": "Lukasiewicz FuzzyPool: Exact Mathematical Sparsity Theorem and COO/CSR Export",
+      "passed": true,
+      "measured_value": 0.1111111111111111,
+      "expected_bound_or_target": "exact IEEE-754 zeros > 0 and lossless COO/CSR conversion",
+      "details": "exact_zero_fraction=11.11%, COO/CSR roundtrip err=0.00e+00"
+    },
+    {
+      "code": "INV-09",
+      "title": "Hamacher-Einstein FuzzyPool: gamma=1 Identity with Goguen and Monotonic Decrease in gamma",
+      "passed": true,
+      "measured_value": 0.0,
+      "expected_bound_or_target": "T_{H,1} == Goguen and A_new(gamma=1) >= A_new(gamma=2) >= A_new(gamma=5)",
+      "details": "|Hamacher(1) - Goguen|=0.00e+00, monotone_decreasing=True"
+    },
+    {
+      "code": "INV-10",
+      "title": "Schweizer-Sklar FuzzyPool: Continuous Continuum between Zadeh (q->inf), Goguen (q->0+), and Lukasiewicz (p=1)",
+      "passed": true,
+      "measured_value": 7.489662375737005e-06,
+      "expected_bound_or_target": "q=80 -> Zadeh (<0.02), q=1e-4 -> Goguen (<1e-4), p=1 == Lukasiewicz",
+      "details": "|SS(q=80)-Zadeh|=0.0031, |SS(q=1e-4)-Goguen|=7.49e-06, |SS(p=1)-Luk|=0.00e+00"
+    },
+    {
+      "code": "INV-11",
+      "title": "Boltzmann FuzzyPool: Limit tau_c -> 0+ to Hard Maximum and dA_new/dtau_c = -Var/tau_c^2 <= 0",
+      "passed": true,
+      "measured_value": -0.5411248700072773,
+      "expected_bound_or_target": "|Boltz(1e-3) - Goguen| < 1e-3 and d(sum A_new)/dtau_c <= 0",
+      "details": "|Boltz(1e-3)-Goguen|=2.30e-04, d(sum A_new)/d(tau_c_tilde)=-0.5411 <= 0"
+    },
+    {
+      "code": "INV-12",
+      "title": "ProbSum FuzzyPool: Exact Saturation of Parallel Paths 1 - (1 - w)^m within [0, 1]",
+      "passed": true,
+      "measured_value": 2.4369395390522186e-13,
+      "expected_bound_or_target": "A_new(0,1) == 1 - (1 - 0.35)^6 = 0.924581 in [0,1]",
+      "details": "ProbSum=0.924581 (in [0,1]) vs DiffPool=2.1000 (>1 overflow)"
+    },
+    {
+      "code": "INV-13",
+      "title": "Bandler-Kohout (Reichenbach): De Morgan Duality Theorem 1 - Goguen(1 1^T - A_refl)",
+      "passed": true,
+      "measured_value": 0.0,
+      "expected_bound_or_target": "|BK_Reichenbach(A) - (1 - Goguen(A_bar))| < 1e-12",
+      "details": "max De Morgan duality error = 0.00e+00"
+    },
+    {
+      "code": "INV-14",
+      "title": "Bandler-Kohout: Clique Extraction Theorem (A_new(I,I) == 1 iff cluster is a clique)",
+      "passed": true,
+      "measured_value": 1.0,
+      "expected_bound_or_target": "A_new(clique, clique) == 1.0, A_new(non_clique, non_clique) << 1.0",
+      "details": "A_new(0,0) [true clique] = 1.0000, A_new(1,1) [1 missing node] = 0.0975"
+    },
+    {
+      "code": "INV-15",
+      "title": "COG Feature Pooling: Limit m -> 1+ to Weighted Mean and Translation Equivariance",
+      "passed": true,
+      "measured_value": 3.4319145664207795e-08,
+      "expected_bound_or_target": "|COG(m->1) - Mean| < 1e-6 and |COG(H+c) - (COG(H)+c)| < 1e-11",
+      "details": "|COG(1+1e-7)-Mean|=3.43e-08, shift_equivariance_err=4.40e-13"
+    },
+    {
+      "code": "INV-16",
+      "title": "Bipolar Pooling & Choquet Integral: Cone Anti-Symmetry and Continuous Min-Mean-Max Interpolation",
+      "passed": true,
+      "measured_value": 2.2032375923686232e-13,
+      "expected_bound_or_target": "Bipolar(-H) == -Bipolar(H), Choquet(alpha=1) == Mean, Choquet(400) <= Mean <= Choquet(1e-4)",
+      "details": "bipolar_antisym_err=0.00e+00, |Choquet(1)-Mean|=2.20e-13, |Choquet(1e-4)-Max|=0.0012, |Choquet(400)-Min|=0.0023"
+    }
+  ],
+  "benchmarks": {
+    "sbm_community": [
+      {
+        "key": "diffpool",
+        "code": "M1",
+        "title": "DiffPool (Bilinear Probabilistic Reduction)",
+        "nmi": 0.5214605258521504,
+        "modularity_q": 0.31133803420739514,
+        "conductance": 0.19445490638877386,
+        "adj_new_max": 140.59402465820312,
+        "exact_sparsity": 0.0,
+        "topo_grad_active_ratio": 1.0,
+        "ms_per_step": 4.024887487480555
+      },
+      {
+        "key": "mincut",
+        "code": "M2",
+        "title": "MinCutPool (Spectral Minimum Cut)",
+        "nmi": 1.0,
+        "modularity_q": 0.56919703626309,
+        "conductance": 0.09699449040348414,
+        "adj_new_max": 0.6420028209686279,
+        "exact_sparsity": 0.3333333432674408,
+        "topo_grad_active_ratio": 1.0,
+        "ms_per_step": 2.334487312486999
+      },
+      {
+        "key": "dmon",
+        "code": "M3",
+        "title": "DMoN (Chung-Lu Modularity Reduction)",
+        "nmi": 1.0,
+        "modularity_q": 0.56919703626309,
+        "conductance": 0.09699449040348414,
+        "adj_new_max": 0.6054930090904236,
+        "exact_sparsity": 0.3333333432674408,
+        "topo_grad_active_ratio": 1.0,
+        "ms_per_step": 2.409895387495453
+      },
+      {
+        "key": "zadeh",
+        "code": "M4",
+        "title": "Zadeh-Godel FuzzyPool (max-min)",
+        "nmi": 1.0,
+        "modularity_q": 0.56919703626309,
+        "conductance": 0.09699449040348414,
+        "adj_new_max": 0.49700668454170227,
+        "exact_sparsity": 0.0,
+        "topo_grad_active_ratio": 0.04444444552063942,
+        "ms_per_step": 2.877671112491953
+      },
+      {
+        "key": "zadeh_rbf",
+        "code": "M4-RBF",
+        "title": "Zadeh-Godel FuzzyPool with Gaussian RBF",
+        "nmi": 0.5156971064193133,
+        "modularity_q": 0.24722515809008566,
+        "conductance": 0.4815166619116889,
+        "adj_new_max": 0.7461621165275574,
+        "exact_sparsity": 0.0,
+        "topo_grad_active_ratio": 0.02222222276031971,
+        "ms_per_step": 2.814530825003203
+      },
+      {
+        "key": "goguen",
+        "code": "M5",
+        "title": "Goguen Algebraic FuzzyPool (max-product)",
+        "nmi": 1.0,
+        "modularity_q": 0.56919703626309,
+        "conductance": 0.09699449040348414,
+        "adj_new_max": 0.3943530023097992,
+        "exact_sparsity": 0.0,
+        "topo_grad_active_ratio": 0.08148147910833359,
+        "ms_per_step": 2.8065233750112384
+      },
+      {
+        "key": "lukasiewicz",
+        "code": "M6",
+        "title": "Bounded Lukasiewicz FuzzyPool ([0,1]-clipping)",
+        "nmi": 1.0,
+        "modularity_q": 0.56919703626309,
+        "conductance": 0.09699449040348414,
+        "adj_new_max": 1.0,
+        "exact_sparsity": 0.0,
+        "topo_grad_active_ratio": 0.0,
+        "ms_per_step": 2.7848328749996654
+      },
+      {
+        "key": "lukasiewicz_smooth",
+        "code": "M6-Sm",
+        "title": "Smooth Lukasiewicz FuzzyPool (Softplus window)",
+        "nmi": 1.0,
+        "modularity_q": 0.56919703626309,
+        "conductance": 0.09699449040348414,
+        "adj_new_max": 0.5109342336654663,
+        "exact_sparsity": 0.0,
+        "topo_grad_active_ratio": 0.08148147910833359,
+        "ms_per_step": 3.220166687492565
+      },
+      {
+        "key": "hamacher",
+        "code": "M7",
+        "title": "Hamacher Rational FuzzyPool",
+        "nmi": 1.0,
+        "modularity_q": 0.56919703626309,
+        "conductance": 0.09699449040348414,
+        "adj_new_max": 0.4439224302768707,
+        "exact_sparsity": 0.0,
+        "topo_grad_active_ratio": 0.06666667014360428,
+        "ms_per_step": 3.0151438750181114
+      },
+      {
+        "key": "einstein",
+        "code": "M7-Ein",
+        "title": "Einstein Relativistic FuzzyPool (gamma=2)",
+        "nmi": 1.0,
+        "modularity_q": 0.56919703626309,
+        "conductance": 0.09699449040348414,
+        "adj_new_max": 0.4391353130340576,
+        "exact_sparsity": 0.0,
+        "topo_grad_active_ratio": 0.07407407462596893,
+        "ms_per_step": 2.91327940001338
+      },
+      {
+        "key": "schweizer_sklar",
+        "code": "M8A",
+        "title": "Schweizer-Sklar Parameterized FuzzyPool",
+        "nmi": 1.0,
+        "modularity_q": 0.56919703626309,
+        "conductance": 0.09699449040348414,
+        "adj_new_max": 0.37796056270599365,
+        "exact_sparsity": 0.0,
+        "topo_grad_active_ratio": 0.07407407462596893,
+        "ms_per_step": 3.171798075004517
+      },
+      {
+        "key": "dombi",
+        "code": "M8B",
+        "title": "Dombi Parameterized FuzzyPool",
+        "nmi": 1.0,
+        "modularity_q": 0.56919703626309,
+        "conductance": 0.09699449040348414,
+        "adj_new_max": 0.337573379278183,
+        "exact_sparsity": 0.0,
+        "topo_grad_active_ratio": 0.07407407462596893,
+        "ms_per_step": 3.411398987486791
+      },
+      {
+        "key": "boltzmann",
+        "code": "M9A",
+        "title": "Boltzmann Energy FuzzyPool (Global Edge)",
+        "nmi": 1.0,
+        "modularity_q": 0.56919703626309,
+        "conductance": 0.09699449040348414,
+        "adj_new_max": 0.4744700491428375,
+        "exact_sparsity": 0.0,
+        "topo_grad_active_ratio": 1.0,
+        "ms_per_step": 2.645743962511915
+      },
+      {
+        "key": "boltzmann_adaptive",
+        "code": "M9-Ad",
+        "title": "Scale-Adaptive Boltzmann FuzzyPool (ln M/K^2)",
+        "nmi": 1.0,
+        "modularity_q": 0.56919703626309,
+        "conductance": 0.09699449040348414,
+        "adj_new_max": 0.44026172161102295,
+        "exact_sparsity": 0.0,
+        "topo_grad_active_ratio": 1.0,
+        "ms_per_step": 2.881942725002773
+      },
+      {
+        "key": "boltzmann_two_step",
+        "code": "M9B",
+        "title": "Two-Step Boltzmann FuzzyPool",
+        "nmi": 1.0,
+        "modularity_q": 0.56919703626309,
+        "conductance": 0.09699449040348414,
+        "adj_new_max": 0.47908729314804077,
+        "exact_sparsity": 0.0,
+        "topo_grad_active_ratio": 1.0,
+        "ms_per_step": 2.7245394375086107
+      },
+      {
+        "key": "probsum",
+        "code": "M10",
+        "title": "Probabilistic Sum FuzzyPool (ProbSum)",
+        "nmi": 1.0,
+        "modularity_q": 0.56919703626309,
+        "conductance": 0.09699449040348414,
+        "adj_new_max": 1.0,
+        "exact_sparsity": 0.0,
+        "topo_grad_active_ratio": 1.0,
+        "ms_per_step": 2.6630185750036617
+      },
+      {
+        "key": "probsum_norm",
+        "code": "M10-Nm",
+        "title": "Scale-Normalized ProbSum FuzzyPool (Mean-Field)",
+        "nmi": 1.0,
+        "modularity_q": 0.56919703626309,
+        "conductance": 0.09699449040348417,
+        "adj_new_max": 0.504682183265686,
+        "exact_sparsity": 0.0,
+        "topo_grad_active_ratio": 1.0,
+        "ms_per_step": 2.6252809000197885
+      },
+      {
+        "key": "bk_lukasiewicz",
+        "code": "M11A",
+        "title": "Bandler-Kohout Implicative FuzzyPool (Lukasiewicz)",
+        "nmi": 1.0,
+        "modularity_q": 0.56919703626309,
+        "conductance": 0.09699449040348414,
+        "adj_new_max": 0.001230001449584961,
+        "exact_sparsity": 0.0,
+        "topo_grad_active_ratio": 0.051851850003004074,
+        "ms_per_step": 3.3019975624938525
+      },
+      {
+        "key": "bk_kleene_dienes",
+        "code": "M11B",
+        "title": "Bandler-Kohout Implicative FuzzyPool (Kleene-Dienes)",
+        "nmi": 1.0,
+        "modularity_q": 0.56919703626309,
+        "conductance": 0.09699449040348414,
+        "adj_new_max": 0.0003159046173095703,
+        "exact_sparsity": 0.0,
+        "topo_grad_active_ratio": 0.03703703731298447,
+        "ms_per_step": 3.475888900015889
+      },
+      {
+        "key": "bk_reichenbach",
+        "code": "M11C",
+        "title": "Bandler-Kohout Implicative FuzzyPool (Reichenbach)",
+        "nmi": 1.0,
+        "modularity_q": 0.56919703626309,
+        "conductance": 0.09699449040348414,
+        "adj_new_max": 0.0011709928512573242,
+        "exact_sparsity": 0.0,
+        "topo_grad_active_ratio": 0.051851850003004074,
+        "ms_per_step": 3.7268749875011054
+      },
+      {
+        "key": "goguen_bipolar",
+        "code": "M13A",
+        "title": "Goguen FuzzyPool + Bipolar Supremal Feature Pooling",
+        "nmi": 1.0,
+        "modularity_q": 0.56919703626309,
+        "conductance": 0.09699449040348414,
+        "adj_new_max": 0.4454873204231262,
+        "exact_sparsity": 0.0,
+        "topo_grad_active_ratio": 0.06666667014360428,
+        "ms_per_step": 2.6113463750107258
+      },
+      {
+        "key": "goguen_choquet",
+        "code": "M13B",
+        "title": "Goguen FuzzyPool + Choquet Integral Feature Pooling",
+        "nmi": 1.0,
+        "modularity_q": 0.56919703626309,
+        "conductance": 0.09699449040348414,
+        "adj_new_max": 0.43016380071640015,
+        "exact_sparsity": 0.0,
+        "topo_grad_active_ratio": 0.07407407462596893,
+        "ms_per_step": 3.192800399983753
+      }
+    ],
+    "planted_clique": [
+      {
+        "key": "bk_reichenbach",
+        "code": "M11C",
+        "title": "Bandler-Kohout Implicative FuzzyPool (Reichenbach)",
+        "internal_clique_density": 0.7777777777777777,
+        "clique_recovery_f1": 0.8333333333333334,
+        "mean_diag_a_new": 0.9285950064659119
+      },
+      {
+        "key": "bk_lukasiewicz",
+        "code": "M11A",
+        "title": "Bandler-Kohout Implicative FuzzyPool (Lukasiewicz)",
+        "internal_clique_density": 0.7333333333333334,
+        "clique_recovery_f1": 0.7777777777777778,
+        "mean_diag_a_new": 0.9962077140808105
+      },
+      {
+        "key": "bk_kleene_dienes",
+        "code": "M11B",
+        "title": "Bandler-Kohout Implicative FuzzyPool (Kleene-Dienes)",
+        "internal_clique_density": 1.0,
+        "clique_recovery_f1": 1.0,
+        "mean_diag_a_new": 0.965981662273407
+      },
+      {
+        "key": "goguen",
+        "code": "M5",
+        "title": "Goguen Algebraic FuzzyPool (max-product)",
+        "internal_clique_density": 0.6444444444444444,
+        "clique_recovery_f1": 0.7222222222222223,
+        "mean_diag_a_new": 0.9986420273780823
+      },
+      {
+        "key": "zadeh",
+        "code": "M4",
+        "title": "Zadeh-Godel FuzzyPool (max-min)",
+        "internal_clique_density": 0.6444444444444444,
+        "clique_recovery_f1": 0.7222222222222223,
+        "mean_diag_a_new": 0.9988827705383301
+      },
+      {
+        "key": "lukasiewicz",
+        "code": "M6",
+        "title": "Bounded Lukasiewicz FuzzyPool ([0,1]-clipping)",
+        "internal_clique_density": 0.6,
+        "clique_recovery_f1": 0.7222222222222223,
+        "mean_diag_a_new": 1.0
+      },
+      {
+        "key": "lukasiewicz_smooth",
+        "code": "M6-Sm",
+        "title": "Smooth Lukasiewicz FuzzyPool (Softplus window)",
+        "internal_clique_density": 0.6222222222222222,
+        "clique_recovery_f1": 0.7222222222222223,
+        "mean_diag_a_new": 0.999841034412384
+      },
+      {
+        "key": "boltzmann",
+        "code": "M9A",
+        "title": "Boltzmann Energy FuzzyPool (Global Edge)",
+        "internal_clique_density": 0.6666666666666666,
+        "clique_recovery_f1": 0.7222222222222223,
+        "mean_diag_a_new": 0.9972512125968933
+      },
+      {
+        "key": "boltzmann_adaptive",
+        "code": "M9-Ad",
+        "title": "Scale-Adaptive Boltzmann FuzzyPool (ln M/K^2)",
+        "internal_clique_density": 0.5777777777777778,
+        "clique_recovery_f1": 0.6666666666666666,
+        "mean_diag_a_new": 0.9982407093048096
+      },
+      {
+        "key": "probsum",
+        "code": "M10",
+        "title": "Probabilistic Sum FuzzyPool (ProbSum)",
+        "internal_clique_density": 0.6444444444444444,
+        "clique_recovery_f1": 0.7777777777777778,
+        "mean_diag_a_new": 0.999993622303009
+      },
+      {
+        "key": "probsum_norm",
+        "code": "M10-Nm",
+        "title": "Scale-Normalized ProbSum FuzzyPool (Mean-Field)",
+        "internal_clique_density": 0.9333333333333332,
+        "clique_recovery_f1": 0.9444444444444445,
+        "mean_diag_a_new": 0.9568386673927307
+      },
+      {
+        "key": "mincut",
+        "code": "M2",
+        "title": "MinCutPool (Spectral Minimum Cut)",
+        "internal_clique_density": 0.5111111111111111,
+        "clique_recovery_f1": 0.6111111111111112,
+        "mean_diag_a_new": 0.0
+      },
+      {
+        "key": "dmon",
+        "code": "M3",
+        "title": "DMoN (Chung-Lu Modularity Reduction)",
+        "internal_clique_density": 0.9111111111111111,
+        "clique_recovery_f1": 0.9444444444444445,
+        "mean_diag_a_new": 0.0
+      }
+    ],
+    "graph_classification": [
+      {
+        "key": "diffpool",
+        "code": "M1",
+        "title": "DiffPool (Bilinear Probabilistic Reduction)",
+        "train_acc": 0.9375,
+        "test_acc": 0.75,
+        "final_loss": 0.4147281348705292,
+        "learned_params_summary": "tau=0.811"
+      },
+      {
+        "key": "mincut",
+        "code": "M2",
+        "title": "MinCutPool (Spectral Minimum Cut)",
+        "train_acc": 0.9375,
+        "test_acc": 0.75,
+        "final_loss": 0.2685774862766266,
+        "learned_params_summary": "tau=0.897"
+      },
+      {
+        "key": "dmon",
+        "code": "M3",
+        "title": "DMoN (Chung-Lu Modularity Reduction)",
+        "train_acc": 0.7708333333333334,
+        "test_acc": 0.75,
+        "final_loss": 0.3888404667377472,
+        "learned_params_summary": "tau=1.000"
+      },
+      {
+        "key": "zadeh",
+        "code": "M4",
+        "title": "Zadeh-Godel FuzzyPool (max-min)",
+        "train_acc": 0.9166666666666666,
+        "test_acc": 0.6875,
+        "final_loss": 0.24000109732151031,
+        "learned_params_summary": "gamma_mean=1.130, COG_m=2.200"
+      },
+      {
+        "key": "zadeh_rbf",
+        "code": "M4-RBF",
+        "title": "Zadeh-Godel FuzzyPool with Gaussian RBF",
+        "train_acc": 0.9583333333333334,
+        "test_acc": 0.8125,
+        "final_loss": 0.18824152648448944,
+        "learned_params_summary": "sigma_mean=0.926, COG_m=2.149"
+      },
+      {
+        "key": "goguen",
+        "code": "M5",
+        "title": "Goguen Algebraic FuzzyPool (max-product)",
+        "train_acc": 0.9166666666666666,
+        "test_acc": 0.6875,
+        "final_loss": 0.24208928644657135,
+        "learned_params_summary": "gamma_mean=1.101, COG_m=2.199"
+      },
+      {
+        "key": "lukasiewicz",
+        "code": "M6",
+        "title": "Bounded Lukasiewicz FuzzyPool ([0,1]-clipping)",
+        "train_acc": 0.9166666666666666,
+        "test_acc": 0.6875,
+        "final_loss": 0.23424850404262543,
+        "learned_params_summary": "gamma_mean=1.124, eta_mean=1.517, COG_m=2.201"
+      },
+      {
+        "key": "lukasiewicz_smooth",
+        "code": "M6-Sm",
+        "title": "Smooth Lukasiewicz FuzzyPool (Softplus window)",
+        "train_acc": 0.9166666666666666,
+        "test_acc": 0.6875,
+        "final_loss": 0.23586146533489227,
+        "learned_params_summary": "gamma_mean=1.130, eta_mean=1.510, COG_m=2.201"
+      },
+      {
+        "key": "hamacher",
+        "code": "M7",
+        "title": "Hamacher Rational FuzzyPool",
+        "train_acc": 0.9166666666666666,
+        "test_acc": 0.6875,
+        "final_loss": 0.24082492291927338,
+        "learned_params_summary": "gamma_mean=1.105, H_gamma=1.202, COG_m=2.199"
+      },
+      {
+        "key": "einstein",
+        "code": "M7-Ein",
+        "title": "Einstein Relativistic FuzzyPool (gamma=2)",
+        "train_acc": 0.9166666666666666,
+        "test_acc": 0.6875,
+        "final_loss": 0.2418881207704544,
+        "learned_params_summary": "gamma_mean=1.102, H_gamma=2.000, COG_m=2.199"
+      },
+      {
+        "key": "schweizer_sklar",
+        "code": "M8A",
+        "title": "Schweizer-Sklar Parameterized FuzzyPool",
+        "train_acc": 0.9166666666666666,
+        "test_acc": 0.6875,
+        "final_loss": 0.24177668988704681,
+        "learned_params_summary": "gamma_mean=1.110, SS_q=0.907, COG_m=2.199"
+      },
+      {
+        "key": "dombi",
+        "code": "M8B",
+        "title": "Dombi Parameterized FuzzyPool",
+        "train_acc": 0.9166666666666666,
+        "test_acc": 0.6875,
+        "final_loss": 0.2417699545621872,
+        "learned_params_summary": "gamma_mean=1.110, Dombi_lam=1.120, COG_m=2.199"
+      },
+      {
+        "key": "boltzmann",
+        "code": "M9A",
+        "title": "Boltzmann Energy FuzzyPool (Global Edge)",
+        "train_acc": 0.9166666666666666,
+        "test_acc": 0.6875,
+        "final_loss": 0.246243417263031,
+        "learned_params_summary": "gamma_mean=1.119, tau_c=0.225, COG_m=2.201"
+      },
+      {
+        "key": "boltzmann_adaptive",
+        "code": "M9-Ad",
+        "title": "Scale-Adaptive Boltzmann FuzzyPool (ln M/K^2)",
+        "train_acc": 0.9166666666666666,
+        "test_acc": 0.6875,
+        "final_loss": 0.24286676943302155,
+        "learned_params_summary": "gamma_mean=1.102, tau_c=0.187, COG_m=2.200"
+      },
+      {
+        "key": "boltzmann_two_step",
+        "code": "M9B",
+        "title": "Two-Step Boltzmann FuzzyPool",
+        "train_acc": 0.9166666666666666,
+        "test_acc": 0.6875,
+        "final_loss": 0.24549798667430878,
+        "learned_params_summary": "gamma_mean=1.116, tau_c=0.291, COG_m=2.201"
+      },
+      {
+        "key": "probsum",
+        "code": "M10",
+        "title": "Probabilistic Sum FuzzyPool (ProbSum)",
+        "train_acc": 0.9166666666666666,
+        "test_acc": 0.6875,
+        "final_loss": 0.23663412034511566,
+        "learned_params_summary": "gamma_mean=1.148, COG_m=2.202"
+      },
+      {
+        "key": "probsum_norm",
+        "code": "M10-Nm",
+        "title": "Scale-Normalized ProbSum FuzzyPool (Mean-Field)",
+        "train_acc": 0.9166666666666666,
+        "test_acc": 0.6875,
+        "final_loss": 0.24102114140987396,
+        "learned_params_summary": "gamma_mean=1.132, COG_m=2.201"
+      },
+      {
+        "key": "bk_lukasiewicz",
+        "code": "M11A",
+        "title": "Bandler-Kohout Implicative FuzzyPool (Lukasiewicz)",
+        "train_acc": 0.9166666666666666,
+        "test_acc": 0.6875,
+        "final_loss": 0.24337632954120636,
+        "learned_params_summary": "gamma_mean=1.156, COG_m=2.199"
+      },
+      {
+        "key": "bk_kleene_dienes",
+        "code": "M11B",
+        "title": "Bandler-Kohout Implicative FuzzyPool (Kleene-Dienes)",
+        "train_acc": 0.9166666666666666,
+        "test_acc": 0.6875,
+        "final_loss": 0.24602852761745453,
+        "learned_params_summary": "gamma_mean=1.141, COG_m=2.199"
+      },
+      {
+        "key": "bk_reichenbach",
+        "code": "M11C",
+        "title": "Bandler-Kohout Implicative FuzzyPool (Reichenbach)",
+        "train_acc": 0.9166666666666666,
+        "test_acc": 0.6875,
+        "final_loss": 0.2451421618461609,
+        "learned_params_summary": "gamma_mean=1.156, COG_m=2.198"
+      },
+      {
+        "key": "goguen_bipolar",
+        "code": "M13A",
+        "title": "Goguen FuzzyPool + Bipolar Supremal Feature Pooling",
+        "train_acc": 1.0,
+        "test_acc": 0.875,
+        "final_loss": 0.03246977925300598,
+        "learned_params_summary": "gamma_mean=1.115"
+      },
+      {
+        "key": "goguen_choquet",
+        "code": "M13B",
+        "title": "Goguen FuzzyPool + Choquet Integral Feature Pooling",
+        "train_acc": 0.8333333333333334,
+        "test_acc": 0.75,
+        "final_loss": 0.330919086933136,
+        "learned_params_summary": "gamma_mean=1.112, Choquet_alpha=0.890"
+      }
+    ]
+  },
+  "figures": [
+    "reports/figures/sbm_and_jacobian_comparison.png",
+    "reports/figures/clique_and_classification.png"
+  ]
+}
