@@ -62,6 +62,13 @@ class ReducerLeaderboardEntry:
     empirical_scaling_exp: float
     is_pareto_optimal: bool
     recommended_use_case: str
+    # Domain-specific test ranks (separated scientific evaluation)
+    community_rank: int = 0
+    clique_rank: int = 0
+    topology_rank: int = 0
+    classification_rank: int = 0
+    gradient_rank: int = 0
+    efficiency_rank: int = 0
 
     def to_dict(self) -> Dict[str, object]:
         return asdict(self)
@@ -78,9 +85,17 @@ class AnalyticsPackageResult:
     audit_stress_records: List[AuditStressRecord]
     scaling_points: List[ScalingPointRecord]
     scaling_summaries: List[ReducerScalingSummary]
+    # Domain-specific test leaderboards (separated from monolithic composite)
+    community_leaderboard: Optional[List[ReducerLeaderboardEntry]] = None
+    clique_leaderboard: Optional[List[ReducerLeaderboardEntry]] = None
+    topology_leaderboard: Optional[List[ReducerLeaderboardEntry]] = None
+    classification_leaderboard: Optional[List[ReducerLeaderboardEntry]] = None
+    gradient_leaderboard: Optional[List[ReducerLeaderboardEntry]] = None
+    efficiency_leaderboard: Optional[List[ReducerLeaderboardEntry]] = None
+    domain_winners: Optional[Dict[str, ReducerLeaderboardEntry]] = None
 
     def to_dict(self) -> Dict[str, object]:
-        return {
+        base = {
             "leaderboard": [e.to_dict() for e in self.leaderboard],
             "dataset_profiles": {
                 ds: [p.to_dict() for p in profs] for ds, profs in self.dataset_profiles.items()
@@ -91,6 +106,21 @@ class AnalyticsPackageResult:
             "scaling_points": [p.to_dict() for p in self.scaling_points],
             "scaling_summaries": [s.to_dict() for s in self.scaling_summaries],
         }
+        if self.community_leaderboard is not None:
+            base["community_leaderboard"] = [e.to_dict() for e in self.community_leaderboard]
+        if self.clique_leaderboard is not None:
+            base["clique_leaderboard"] = [e.to_dict() for e in self.clique_leaderboard]
+        if self.topology_leaderboard is not None:
+            base["topology_leaderboard"] = [e.to_dict() for e in self.topology_leaderboard]
+        if self.classification_leaderboard is not None:
+            base["classification_leaderboard"] = [e.to_dict() for e in self.classification_leaderboard]
+        if self.gradient_leaderboard is not None:
+            base["gradient_leaderboard"] = [e.to_dict() for e in self.gradient_leaderboard]
+        if self.efficiency_leaderboard is not None:
+            base["efficiency_leaderboard"] = [e.to_dict() for e in self.efficiency_leaderboard]
+        if self.domain_winners is not None:
+            base["domain_winners"] = {k: v.to_dict() for k, v in self.domain_winners.items()}
+        return base
 
 
 def train_and_profile_unsupervised_dataset(
@@ -349,6 +379,36 @@ def run_comprehensive_analytics(
     for idx, entry in enumerate(raw_entries, start=1):
         entry.rank = idx
 
+    # Assign separate domain test ranks (decoupling from composite score)
+    domain_sort_fields = [
+        ("community_score", "community_rank"),
+        ("clique_isolation_score", "clique_rank"),
+        ("topology_spectral_score", "topology_rank"),
+        ("classification_score", "classification_rank"),
+        ("gradient_stability_score", "gradient_rank"),
+        ("efficiency_score", "efficiency_rank"),
+    ]
+    for score_attr, rank_attr in domain_sort_fields:
+        sorted_by_attr = sorted(raw_entries, key=lambda e: getattr(e, score_attr), reverse=True)
+        for d_rank, e in enumerate(sorted_by_attr, start=1):
+            setattr(e, rank_attr, d_rank)
+
+    community_lead = sorted(raw_entries, key=lambda e: (e.community_rank, -e.community_score))
+    clique_lead = sorted(raw_entries, key=lambda e: (e.clique_rank, -e.clique_isolation_score))
+    topology_lead = sorted(raw_entries, key=lambda e: (e.topology_rank, -e.topology_spectral_score))
+    classification_lead = sorted(raw_entries, key=lambda e: (e.classification_rank, -e.classification_score))
+    gradient_lead = sorted(raw_entries, key=lambda e: (e.gradient_rank, -e.gradient_stability_score))
+    efficiency_lead = sorted(raw_entries, key=lambda e: (e.efficiency_rank, -e.efficiency_score))
+
+    domain_winners = {
+        "community": community_lead[0],
+        "clique": clique_lead[0],
+        "topology": topology_lead[0],
+        "classification": classification_lead[0],
+        "gradient": gradient_lead[0],
+        "efficiency": efficiency_lead[0],
+    }
+
     return AnalyticsPackageResult(
         leaderboard=raw_entries,
         dataset_profiles=dataset_profiles,
@@ -357,4 +417,11 @@ def run_comprehensive_analytics(
         audit_stress_records=audit_records,
         scaling_points=scaling_points,
         scaling_summaries=scaling_summaries,
+        community_leaderboard=community_lead,
+        clique_leaderboard=clique_lead,
+        topology_leaderboard=topology_lead,
+        classification_leaderboard=classification_lead,
+        gradient_leaderboard=gradient_lead,
+        efficiency_leaderboard=efficiency_lead,
+        domain_winners=domain_winners,
     )

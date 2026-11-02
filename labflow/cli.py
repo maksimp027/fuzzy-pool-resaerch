@@ -13,9 +13,15 @@ from labflow.analytics import (
     run_scaling_profiler,
 )
 from labflow.benchmarks import (
+    run_clique_motif_benchmark,
+    run_community_detection_benchmark,
+    run_component_ablation_benchmark,
+    run_efficiency_benchmark,
+    run_gradient_stability_benchmark,
     run_graph_classification_benchmark,
     run_planted_clique_benchmark,
     run_sbm_community_benchmark,
+    run_topology_fidelity_benchmark,
 )
 from labflow.composite import CANONICAL_METHOD_SPECS
 from labflow.reporting import write_analytics_reports, write_labflow_reports
@@ -137,45 +143,103 @@ def _cmd_compare(
             f"{e.dead_superedge_ratio:<7.0%} {e.ms_large_graph:.2f}"
         )
 
+    if res.domain_winners:
+        print("\n[3] Domain-Specific Benchmark Champions (Decoupled Scientific Tests):")
+        print(f"  - Community Detection:      {res.domain_winners['community'].method_code:<8} ({res.domain_winners['community'].method_key:<20}) score={res.domain_winners['community'].community_score:.3f}")
+        print(f"  - Planted Clique Isolation: {res.domain_winners['clique'].method_code:<8} ({res.domain_winners['clique'].method_key:<20}) score={res.domain_winners['clique'].clique_isolation_score:.3f}")
+        print(f"  - Topological Fidelity:     {res.domain_winners['topology'].method_code:<8} ({res.domain_winners['topology'].method_key:<20}) score={res.domain_winners['topology'].topology_spectral_score:.3f}")
+        print(f"  - GNN Graph Classification: {res.domain_winners['classification'].method_code:<8} ({res.domain_winners['classification'].method_key:<20}) test_acc={res.domain_winners['classification'].classification_score:.1%}")
+        print(f"  - Gradient Stability:       {res.domain_winners['gradient'].method_code:<8} ({res.domain_winners['gradient'].method_key:<20}) score={res.domain_winners['gradient'].gradient_stability_score:.3f}")
+        print(f"  - Asymptotic Efficiency:    {res.domain_winners['efficiency'].method_code:<8} ({res.domain_winners['efficiency'].method_key:<20}) time={res.domain_winners['efficiency'].ms_large_graph:.2f} ms")
+
     paths = write_analytics_reports(output_dir=output_dir, analytics=res)
-    print("\n[3] Generated analytical reports, CSV leaderboard, and diagnostic figures:")
+    print("\n[4] Generated analytical reports, CSV leaderboard, and diagnostic figures:")
     for k_name, p in paths.items():
         print(f"  - {k_name}: {p}")
 
     return 0 if ok_st == len(res.audit_stress_records) else 1
 
 
-def _cmd_benchmark(output_dir: Path, sbm_epochs: int, clique_epochs: int, cls_epochs: int) -> int:
-    print("[1/3] Running SBM Community & Jacobian Sparsity benchmark...")
-    sbm = run_sbm_community_benchmark(epochs=sbm_epochs)
-    for r in sbm:
-        print(
-            f"  {r.code:<7} {r.key:<21} NMI={r.nmi:.3f}  Q={r.modularity_q:.3f}  "
-            f"max(A_new)={r.adj_new_max:.3f}  zeros={r.exact_sparsity:.0%}  active_grad={r.topo_grad_active_ratio:.1%}"
-        )
+def _cmd_benchmark(
+    output_dir: Path,
+    sbm_epochs: int,
+    clique_epochs: int,
+    cls_epochs: int,
+    test: str = "all",
+) -> int:
+    if test in ("all", "community"):
+        print("[Test 1/6] Running Dedicated Community Detection & Modularity Benchmark...")
+        comm = run_community_detection_benchmark(epochs=sbm_epochs)
+        for r in comm:
+            print(
+                f"  {r.code:<7} {r.key:<21} NMI={r.nmi:.3f}  Q={r.modularity_q:.3f}  "
+                f"Cond={r.conductance:.3f}  Purity={r.cluster_purity:.3f}  F1={r.macro_f1:.3f}"
+            )
 
-    print("[2/3] Running Planted Clique Isolation benchmark...")
-    clq = run_planted_clique_benchmark(epochs=clique_epochs)
-    for r in clq:
-        print(
-            f"  {r.code:<7} {r.key:<21} clique_density={r.internal_clique_density:.3f}  "
-            f"F1={r.clique_recovery_f1:.3f}  diag(A_new)={r.mean_diag_a_new:.3f}"
-        )
+    if test in ("all", "clique"):
+        print("[Test 2/6] Running Dedicated Planted Clique & Motif Isolation Benchmark...")
+        clq = run_clique_motif_benchmark(epochs=clique_epochs)
+        for r in clq:
+            print(
+                f"  {r.code:<7} {r.key:<21} density={r.internal_clique_density:.3f}  "
+                f"F1={r.clique_recovery_f1:.3f}  reflexivity={r.diagonal_reflexivity:.3f}  contrast={r.motif_contrast_ratio:.2f}"
+            )
 
-    print("[3/3] Running End-to-End Graph Classification benchmark...")
-    cls_res = run_graph_classification_benchmark(epochs=cls_epochs)
-    for r in cls_res:
-        print(
-            f"  {r.code:<7} {r.key:<21} train_acc={r.train_acc:.1%}  test_acc={r.test_acc:.1%}  [{r.learned_params_summary}]"
-        )
+    if test in ("all", "topology"):
+        print("[Test 3/6] Running Dedicated Topological & Spectral Fidelity Benchmark...")
+        topo = run_topology_fidelity_benchmark(epochs=max(sbm_epochs // 2, 20))
+        for r in topo:
+            print(
+                f"  {r.code:<7} {r.key:<21} AUC={r.link_recon_auc:.3f}  RMSE={r.link_recon_rmse:.3f}  "
+                f"SpecDist={r.spectral_laplacian_dist:.3f}  exact_zeros={r.exact_sparsity:.0%}  unit={r.unit_interval_compliance:.0%}"
+            )
 
-    paths = write_labflow_reports(
-        output_dir=output_dir,
-        sbm_records=sbm,
-        clique_records=clq,
-        cls_records=cls_res,
-    )
-    print(f"Benchmark reports and figures saved to: {paths['markdown']}")
+    if test in ("all", "classification"):
+        print("[Test 4/6] Running Dedicated Hierarchical Graph Classification Benchmark...")
+        cls_res = run_graph_classification_benchmark(epochs=cls_epochs)
+        for r in cls_res:
+            print(
+                f"  {r.code:<7} {r.key:<21} train_acc={r.train_acc:.1%}  test_acc={r.test_acc:.1%}  "
+                f"gap={r.generalization_gap:.1%}  loss={r.final_loss:.4f}  [{r.learned_params_summary}]"
+            )
+
+    if test in ("all", "gradient"):
+        print("[Test 5/6] Running Dedicated Gradient Dynamics & Dead Super-Edge Benchmark...")
+        grad = run_gradient_stability_benchmark()
+        for r in grad:
+            print(
+                f"  {r.code:<7} {r.key:<21} jac_density={r.topo_jacobian_density:.1%}  "
+                f"dead_edges={r.dead_superedge_ratio:.0%}  finite_grad={r.param_grad_finite_ratio:.0%}  grad_norm={r.mean_gradient_norm:.3e}"
+            )
+
+    if test in ("all", "efficiency"):
+        print("[Test 6/6] Running Dedicated Computational Efficiency & Scaling Benchmark...")
+        eff = run_efficiency_benchmark(node_sizes=(150, 450, 1200))
+        for r in eff:
+            print(
+                f"  {r.code:<7} {r.key:<21} alpha={r.empirical_scaling_exp:.2f}  "
+                f"ms_min={r.ms_at_smallest_n:.2f}  ms_max={r.ms_at_largest_n:.2f}  mem_mb={r.peak_memory_mb_largest_n:.2f}"
+            )
+
+    if test == "ablation":
+        print("[Ablation] Running Component-Level Reduction Ablation Benchmark...")
+        abl = run_component_ablation_benchmark()
+        for r in abl:
+            print(
+                f"  [{r.component_type:<12}] {r.variant_name:<14} -> {r.metric_name}={r.metric_value:.3f} (delta={r.isolated_delta:+.3f})"
+            )
+
+    if test == "all":
+        sbm_legacy = run_sbm_community_benchmark(epochs=min(sbm_epochs, 25))
+        clq_legacy = run_planted_clique_benchmark(epochs=min(clique_epochs, 35))
+        cls_legacy = run_graph_classification_benchmark(epochs=min(cls_epochs, 10))
+        paths = write_labflow_reports(
+            output_dir=output_dir,
+            sbm_records=sbm_legacy,
+            clique_records=clq_legacy,
+            cls_records=cls_legacy,
+        )
+        print(f"\nBenchmark reports and figures saved to: {paths['markdown']}")
     return 0
 
 
@@ -259,6 +323,13 @@ def build_parser() -> argparse.ArgumentParser:
     p_bm.add_argument("--sbm-epochs", type=int, default=80)
     p_bm.add_argument("--clique-epochs", type=int, default=120)
     p_bm.add_argument("--cls-epochs", type=int, default=22)
+    p_bm.add_argument(
+        "--test",
+        type=str,
+        default="all",
+        choices=["all", "community", "clique", "topology", "classification", "gradient", "efficiency", "ablation"],
+        help="Select specific benchmark test to run (splits composite into independent tests)",
+    )
 
     p_all = sub.add_parser("run-all", help="Complete Labflow cycle: mathematical validation + benchmarks + reports & plots")
     p_all.add_argument("--output-dir", type=Path, default=Path("reports"))
@@ -296,7 +367,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             args.sizes,
         )
     if args.command == "benchmark":
-        return _cmd_benchmark(args.output_dir, args.sbm_epochs, args.clique_epochs, args.cls_epochs)
+        return _cmd_benchmark(
+            args.output_dir,
+            args.sbm_epochs,
+            args.clique_epochs,
+            args.cls_epochs,
+            test=args.test,
+        )
     if args.command == "run-all":
         return _cmd_run_all(args.output_dir, args.sbm_epochs, args.clique_epochs, args.cls_epochs)
     return 1

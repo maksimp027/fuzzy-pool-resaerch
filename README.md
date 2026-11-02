@@ -7,6 +7,8 @@
 ## Table of Contents
 1. [Abstract & Executive Summary](#1-abstract--executive-summary)
 2. [Mathematical Foundations & Pipeline Formulation](#2-mathematical-foundations--pipeline-formulation)
+   - [The Select-Reduce-Connect (SRC) Paradigm](#the-select-reduce-connect-src-paradigm)
+   - [Index Spaces & Micro vs Macro Graph Representations](#index-spaces--micro-vs-macro-graph-representations)
    - [Common Preprocessing & True Sparse GNN Encoder](#common-preprocessing--true-sparse-gnn-encoder)
    - [Cluster Membership Assignment Operators](#cluster-membership-assignment-operators)
 3. [Taxonomy of Graph Reduction Methods](#3-taxonomy-of-graph-reduction-methods)
@@ -22,13 +24,15 @@
    - [Audit Fix 5: Log-Domain Extreme Parameter Stability for Schweizer-Sklar & Dombi](#audit-fix-5-log-domain-extreme-parameter-stability-for-schweizer-sklar--dombi)
    - [Audit Fix 6: Matrix-Free Sparse MEX Decomposition for Bandler-Kohout](#audit-fix-6-matrix-free-sparse-mex-decomposition-for-bandler-kohout)
 5. [Validation Suite: Analytical Jacobians & Invariants](#5-validation-suite-analytical-jacobians--invariants)
-6. [Experimental Benchmarks & Protocol](#6-experimental-benchmarks--protocol)
+6. [Experimental Benchmarks: 7 Independent Domain Suites](#6-experimental-benchmarks-7-independent-domain-suites)
 7. [Comprehensive Comparative Results & Leaderboard](#7-comprehensive-comparative-results--leaderboard)
    - [Consolidated Multi-Criteria Leaderboard](#consolidated-multi-criteria-leaderboard)
+   - [Domain-Specific Scientific Champions](#domain-specific-scientific-champions)
    - [Pareto Frontier & Efficiency Analysis](#pareto-frontier--efficiency-analysis)
    - [Visual Analysis & Diagnostic Figures](#visual-analysis--diagnostic-figures)
-8. [Practical Selection Guide & Decision Taxonomy](#8-practical-selection-guide--decision-taxonomy)
-9. [Repository Structure & Reproduction Commands](#9-repository-structure--reproduction-commands)
+8. [Interactive Jupyter Experiment Journals](#8-interactive-jupyter-experiment-journals)
+9. [Practical Selection Guide & Decision Taxonomy](#9-practical-selection-guide--decision-taxonomy)
+10. [Repository Structure & Reproduction Commands](#10-repository-structure--reproduction-commands)
 
 ---
 
@@ -38,47 +42,69 @@ Hierarchical Graph Neural Networks (GNNs) rely crucially on **graph reduction (p
 1. **Edge Mass Conservation Breakdown**: Bilinear forms $A_{new} = S^T A S$ compress total edge mass $2M$ into a $K \times K$ matrix, exploding average edge weights by $(N/K)^2$ and destroying the unit probability interval $[0, 1]$.
 2. **Cluster Overlap Inability & Blur**: Softmax simplex constraints enforce mutual exclusivity, failing to represent nodes that participate in multiple overlapping biological pathways, functional motifs, or social circles.
 3. **Loss of Non-Linear Graph Semantics**: Real-world graph structures exhibit bottleneck thresholds, extremal capacity constraints, and asymmetric directed inclusions that cannot be captured by bilinear forms.
+4. **Destructive Interference of Signed Features**: Linear weighted pooling $X_{new} = S^T H$ causes mutual cancellation between opposing nodal activations under signed activation functions (LeakyReLU / ELU).
 
 This research project introduces **Labflow**, a unified mathematical and empirical research suite comprising **22 canonical graph reduction configurations** spanning classical spectral methods, relational fuzzy $\sup\text{-}\top$ reductions, smooth energy/probabilistic aggregations, Bandler-Kohout implicative operators, and non-additive Choquet integral feature pooling. Every reduction layer is implemented with custom analytical Jacobians (`torch.autograd.Function`) and validated against machine precision with double-precision `gradcheck`.
 
 ### Key Research Highlights
-- **100% Verification Rate**: All 55 analytical Jacobians pass `torch.autograd.gradcheck` with relative error $< 10^{-5}$, all 20 two-step sparse equivalence tests achieve machine-zero discrepancy ($\le 4.44 \times 10^{-16}$), and all 16 theoretical invariants are mathematically and numerically validated.
+- **100% Verification Rate**: All 55 analytical Jacobians pass `torch.autograd.gradcheck` with relative error $< 10^{-5}$, all 20 two-step sparse equivalence tests achieve machine-zero discrepancy ($\le 4.44 \times 10^{-16}$), and all 16 theoretical invariants are mathematically and numerically validated across 60 automated tests.
 - **Pareto-Optimal Operators Identified**:
   - **Bandler-Kohout Implicative Pool (`M11B` Kleene-Dienes)**: Dominates the multi-criteria evaluation with a composite score of **0.763**, delivering perfect $1.000$ planted clique isolation via universal quantification ($\forall i, j$).
-  - **Bipolar Supremal Feature Pool (`M13A`)**: Achieves the highest end-to-end GNN classification accuracy (**87.5%**) on graph classification by preserving positive and negative feature extrema separately.
+  - **Bipolar Supremal Feature Pool (`M13A`)**: Achieves the highest end-to-end GNN classification accuracy (**87.5%**) by preserving positive and negative feature extrema separately.
   - **MinCutPool (`M2`)**: Remains the fastest spectral partitioner (**4.50 ms** on $N=2400$) for strictly non-overlapping partitioning.
-- **Elimination of Critical Theoretical Pitfalls**: Resolution of the 0/0 algebraic singularity in ternary Hamacher t-norms, bounded $[0, 1]$ clamping in Łukasiewicz pooling, elimination of *Dead Super-Edges* via $C^\infty$ Softplus windows, scale-invariant mean-field normalization for ProbSum, and matrix-free sparse MEX algorithms avoiding dense $\mathcal{O}(N^2)$ memory allocation.
+- **Decomposition of Composite Evaluation**: Replaced monolithic composite ranking with 7 dedicated domain benchmark tests, preventing misleading aggregated trade-offs.
 
 ---
 
 ## 2. Mathematical Foundations & Pipeline Formulation
 
-Let $G = (V, E, A, X)$ denote an attributed graph with $N = |V|$ nodes, $M = |E|$ directed edges, adjacency matrix $A \in [0, 1]^{N \times N}$, and node feature matrix $X \in \mathbb{R}^{N \times F}$. Coarse-graining maps $G \mapsto G_{new} = (V_{new}, E_{new}, A_{new}, X_{new})$, where $|V_{new}| = K$ ($K \ll N$) and $X_{new} \in \mathbb{R}^{K \times F'}$.
+### The Select-Reduce-Connect (SRC) Paradigm
+
+In Labflow, every graph coarse-graining layer is formalized as a composition of three mathematically decoupled and differentiable phases:
+
+$$\text{SRC}: (A, X) \xrightarrow{\text{SELECT}} S \xrightarrow{\text{REDUCE}} X_{new} \xrightarrow{\text{CONNECT}} A_{new}$$
+
+1. **SELECT (Cluster Assignment)**:
+   Maps micro-nodes to super-nodes via a continuous membership operator:
+   $$S = \Phi(Z) \in [0, 1]^{N \times K}, \quad Z = \text{GNN}_{pool}(A, X) \in \mathbb{R}^{N \times K}$$
+2. **REDUCE (Feature Space Aggregation)**:
+   Compresses node features $H \in \mathbb{R}^{N \times F'}$ into super-node features $X_{new} \in \mathbb{R}^{K \times F'}$:
+   $$X_{new} = \text{Pool}_X(H, S), \quad \text{Pool}_X: \mathbb{R}^{N \times F'} \times [0, 1]^{N \times K} \to \mathbb{R}^{K \times F'}$$
+3. **CONNECT (Topological Coarse-Graining)**:
+   Derives super-graph connectivity $A_{new} \in [0, 1]^{K \times K}$ through fuzzy relational calculus:
+   $$A_{new} = \text{Reduce}_A(A, S), \quad \text{Reduce}_A: [0, 1]^{N \times N} \times [0, 1]^{N \times K} \to [0, 1]^{K \times K}$$
 
 ```
-                 Input Graph G = (A, X)
-                           |
-            +--------------+--------------+
-            |                             |
-      GNN_embed(A, X)               GNN_pool(A, X)
-            |                             |
-     Node Embeddings               Pooling Logits
-       H in R^{N x F'}               Z in R^{N x K}
-            |                             |
-            |                     Membership Function
-            |                      S = sigma(Z) in [0,1]^{N x K}
-            |                             |
-            +--------------+--------------+
-                           |
-             +-------------+-------------+
-             |                           |
-     Feature Pooling             Topology Reduction
-    X_new = Pool_X(S, H)       A_new = Reduce_A(S, A)
-             |                           |
-             +-------------+-------------+
-                           |
-               Coarse Graph G_new = (A_new, X_new)
+                         Input Graph G = (A, X)
+                                   |
+                 +-----------------+-----------------+
+                 |                                   |
+     Embedding Branch (Content)          Assignment Branch (Partition)
+       H = ReLU(A_hat X W_embed)            Z = A_hat X W_pool
+             H in R^{N x F'}                     Z in R^{N x K}
+                 |                                   |
+                 |                           Membership Function
+                 |                     S = Membership(Z) in [0, 1]^{N x K}
+                 |                                   |
+                 +-----------------+-----------------+
+                                   |
+                    +--------------+--------------+
+                    |                             |
+             Feature Pooling              Topology Reduction
+          X_new = Pool_X(H, S)          A_new = Reduce_A(A, S)
+                    |                             |
+                    +--------------+--------------+
+                                   |
+                     Supergraph G_new = (A_new, X_new)
 ```
+
+### Index Spaces & Micro vs Macro Graph Representations
+
+A central source of conceptual ambiguity in graph coarsening literature is the blurring of index spaces. Labflow strictly formalizes the distinction:
+- **Micro-nodes (input level)**: Indexed by lowercase Latin letters $i, j \in \{1, \dots, N\}$.
+- **Micro-edges**: Pairs $(i, j) \in E \subseteq V \times V$ with weight $A_{ij} \in [0, 1]$.
+- **Macro-nodes / Super-nodes (coarse level)**: Indexed by uppercase Latin letters $I, J \in \{1, \dots, K\}$, with $K \ll N$.
+- **Super-edges**: Directed affinities $A_{new}(I, J) \in [0, 1]$ quantifying relational connectivity between cluster $I$ and cluster $J$.
 
 ### Common Preprocessing & True Sparse GNN Encoder
 
@@ -99,6 +125,7 @@ The membership matrix $S \in [0, 1]^{N \times K}$ quantifies the degree of assig
    $$S_{iI} = \frac{\exp(Z_{iI} / \tau)}{\sum_{J=1}^K \exp(Z_{iJ} / \tau)}, \quad \sum_{I=1}^K S_{iI} = 1$$
 2. **Anisotropic Logistic Sigmoid** (Fuzzy Overlapping Methods):
    $$S_{iI} = \sigma\left(\frac{Z_{iI} - \mu_I}{\sigma_I}\right) = \frac{1}{1 + \exp\left(-(Z_{iI} - \mu_I)/\sigma_I\right)}, \quad S_{iI} \in [0, 1]$$
+   where $\mu_I = \frac{1}{N}\sum_{i=1}^N Z_{iI}$ and $\sigma_I = \sqrt{\frac{1}{N}\sum_{i=1}^N (Z_{iI} - \mu_I)^2 + \epsilon}$.
 3. **Gaussian Radial Basis Function (RBF)** (Metric Prototypes):
    $$S_{iI} = \exp\left( -\frac{\|Z_{i, :} - C_{I, :}\|_2^2}{2 \sigma_I^2} \right)$$
 
@@ -106,7 +133,7 @@ The membership matrix $S \in [0, 1]^{N \times K}$ quantifies the degree of assig
 
 ## 3. Taxonomy of Graph Reduction Methods
 
-The Labflow framework systematizes 22 canonical configurations across 4 mathematical divisions:
+Labflow systematizes 22 canonical configurations across 4 mathematical divisions:
 
 ### Division I: Classical Bilinear & Spectral Operators
 
@@ -117,11 +144,12 @@ The Labflow framework systematizes 22 canonical configurations across 4 mathemat
 | **M3** | `dmon` | $A_{new} = S^T A S - \frac{(S^T \mathbf{d})(S^T \mathbf{d})^T}{2M}$ | $\mathcal{L}_{mod} = -\frac{1}{2M}\text{Tr}(S^T B S)$, $\mathcal{L}_{col} = \frac{\sqrt{K}}{N}\|\sum_i S_{i,:}\|_2 - 1$ | $\mathcal{O}(MK + NK)$ |
 
 #### Analytical Jacobians:
-For DiffPool, the exact matrix differential yields:
-$$\frac{\partial \mathcal{L}}{\partial H} = S G_X \in \mathbb{R}^{N \times F'}, \quad \frac{\partial \mathcal{L}}{\partial S} = H G_X^T + A S G_A^T + A^T S G_A + \nabla_S \mathcal{L}_{LP} + \nabla_S \mathcal{L}_{ent}$$
-
-Using the Frobenius trace identity, $\mathcal{L}_{LP}$ is computed in $\mathcal{O}(MK + NK^2)$ without dense $N \times N$ allocation:
-$$\|A - SS^T\|_F^2 = \|A\|_F^2 - 2 \text{Tr}(S^T A S) + \|S^T S\|_F^2$$
+- **DiffPool (`M1`)**:
+  $$\frac{\partial \mathcal{L}}{\partial H} = S G_X \in \mathbb{R}^{N \times F'}, \quad \frac{\partial \mathcal{L}}{\partial S} = H G_X^T + A S G_A^T + A^T S G_A + \nabla_S \mathcal{L}_{LP} + \nabla_S \mathcal{L}_{ent}$$
+  Computed via the Frobenius trace identity in $\mathcal{O}(MK + NK^2)$ without dense $N \times N$ allocation:
+  $$\|A - SS^T\|_F^2 = \|A\|_F^2 - 2 \text{Tr}(S^T A S) + \|S^T S\|_F^2$$
+- **MinCutPool (`M2`)**:
+  $$\nabla_S \mathcal{L}_{cut} = -\frac{2 (A S \cdot \text{Tr}(S^T D S) - D S \cdot \text{Tr}(S^T A S))}{(\text{Tr}(S^T D S))^2}$$
 
 ---
 
@@ -176,123 +204,121 @@ Every operator in this family admits a **two-step sparse decomposition**:
 | **M11B** | `bk_kleene_dienes` | $A_{new}(I, J) = \inf_i \sup_j \max(1 - S_{iI}, A_{ij} S_{jJ})$ | **Planted Clique Isolation**: $A_{new}(I, I) = 1 \iff \text{supp}(S_{:, I})$ is a clique |
 | **M11C** | `bk_reichenbach` | $A_{new}(I, J) = \inf_i \sup_j (1 - S_{iI} + S_{iI} A_{ij} S_{jJ})$ | De Morgan duality: $A_{new} = 1 - \text{Goguen}(S, 1 - A_{refl})$ |
 
+#### Mean-Field ProbSum Analytical Gradient:
+$$\frac{\partial A_{new}^{MF}(I, J)}{\partial S_{iI}} = \left(1 - A_{new}^{MF}(I, J)\right) \cdot \frac{K^2}{M} \cdot \sum_{j: (i, j) \in E} \frac{A_{ij} S_{jJ}}{1 - S_{iI} A_{ij} S_{jJ} + \epsilon}$$
+
 ---
 
 ### Division IV: Fuzzy Feature Space Reduction
-
-To aggregate node features $H \in \mathbb{R}^{N \times F'}$ into super-node features $X_{new} \in \mathbb{R}^{K \times F'}$, Labflow implements three non-linear paradigms:
 
 1. **Center-of-Gravity (COG) Defuzzification (`M12`)**:
    $$X_{new}(I, f) = \frac{\sum_{i=1}^N S_{iI}^m H_{if}}{\sum_{i=1}^N S_{iI}^m}, \quad m > 1$$
    - Centered gradient identity: $\frac{\partial X_{new}(I, f)}{\partial S_{iI}} = \frac{m S_{iI}^{m-1}}{\sum_j S_{jI}^m} (H_{if} - X_{new}(I, f))$ (zero gradient when node matches centroid).
    - Equivariant to translation: $\text{COG}(H + c) = \text{COG}(H) + c$.
 2. **Bipolar Supremal Feature Pooling (`M13A`)**:
-   $$X_{new}^+(I, f) = \sup_{i} (S_{iI} \cdot \max(0, H_{if})), \quad X_{new}^-(I, f) = \sup_{i} (S_{iI} \cdot \max(0, -H_{if}))$$
+   $$H_{if}^+ = \max(0, H_{if}), \quad H_{if}^- = \max(0, -H_{if})$$
+   $$X_{new}^+(I, f) = \sup_{i} (S_{iI} \cdot H_{if}^+), \quad X_{new}^-(I, f) = \sup_{i} (S_{iI} \cdot H_{if}^-)$$
    $$X_{new}(I, f) = X_{new}^+(I, f) - X_{new}^-(I, f)$$
-   - Exactly anti-symmetric: $\text{Bipolar}(-H) = -\text{Bipolar}(H)$. Preserves signed activations without cancellation.
+   - Exactly anti-symmetric: $\text{Bipolar}(-H) = -\text{Bipolar}(H)$. Preserves signed activations without destructive cancellation.
 3. **Discrete Choquet Integral Feature Pooling (`M13B`)**:
    Under a fuzzy capacity measure $\mu_\alpha(A) = (|A|/N)^\alpha$, features are sorted $H_{\pi(1), f} \le \dots \le H_{\pi(N), f}$ and integrated via Abel summation:
    $$X_{new}(I, f) = \sum_{i=1}^N H_{\pi(i), f} \cdot \left[ \mu_\alpha(E_i) - \mu_\alpha(E_{i+1}) \right]$$
-   - Parameter continuum: $\alpha = 1 \implies \text{Mean}$, $\alpha \to 0^+ \implies \text{Maximum}$, $\alpha \to \infty \implies \text{Minimum}$.
 
 ---
 
 ## 4. Theoretical & Algorithmic Audit Findings
 
-During the rigorous mathematical auditing phase, 6 critical theoretical anomalies and performance bottlenecks were formally proven and repaired:
+During mathematical auditing, 6 critical anomalies were formally proven and repaired:
 
 ### Audit Fix 1: Ternary Hamacher Algebraic Singularity
-- **Theoretical Flaw**: Naive literature specifications propose closed ternary rational formulas for Hamacher t-norms that violate the unit element boundary axiom:
+- **Theoretical Flaw**: Closed ternary rational formulas for Hamacher t-norms violate the unit element boundary axiom:
   $$\top_{H, \gamma}(1, 1, 1) = \frac{1}{\gamma^2 + 2\gamma - 1} \ne 1 \quad (\text{yields } 4.0 \text{ at } \gamma=0.5!)$$
 - **Mathematical Remedy**: Labflow enforces associative binary composition:
   $$T_{H, \gamma}(a, b, c) = T_{H, \gamma}\left(T_{H, \gamma}(a, b), c\right), \quad T_{H, \gamma}(u, v) = \frac{u v}{\gamma + (1-\gamma)(u + v - uv)}$$
-  Validated under `ST-01` across $\gamma \in [10^{-4}, 10]$ with boundary error $< 10^{-15}$.
 
 ### Audit Fix 2: Bounded Range Violation in Łukasiewicz Topology
-- **Theoretical Flaw**: When threshold $\eta_{IJ} \in (1, 2)$ is learned, ideal bonds ($S_{iI}=1, A_{ij}=1, S_{jJ}=1$) yield $1 + 1 + 1 - \eta = 3 - \eta > 1.0$, violating fuzzy unit-interval closure.
+- **Theoretical Flaw**: When learnable threshold $\eta_{IJ} \in (1, 2)$, ideal bonds yield $1 + 1 + 1 - \eta > 1.0$, violating fuzzy unit-interval closure.
 - **Mathematical Remedy**: Strict projection via two-sided clipping:
   $$A_{new}(I, J) = \min\left(1.0, \max\left(0.0, S_{iI} + A_{ij} + S_{jJ} - \eta_{IJ}\right)\right)$$
-  Validated under `ST-02`, eliminating unconstrained overflow $> 1.8$.
 
 ### Audit Fix 3: Elimination of Dead Super-Edges via Softplus Windows
-- **Theoretical Flaw**: The hard ReLU operator in bounded Łukasiewicz truncates gradients to zero whenever all candidate edges fall below threshold $\eta_{IJ}$. Under cold-start initialization, super-nodes become permanently disconnected (*Dead Super-Edges*), causing $\nabla_S = \mathbf{0}$.
+- **Theoretical Flaw**: The hard ReLU operator in bounded Łukasiewicz truncates gradients to zero whenever all candidate edges fall below threshold $\eta_{IJ}$. Under cold start, super-nodes become permanently disconnected (*Dead Super-Edges*), causing $\nabla_S = \mathbf{0}$.
 - **Mathematical Remedy**: Implementation of `M6-Sm` (`lukasiewicz_smooth`) with a $C^\infty$ Softplus window:
-  $$\top_{L, \tau}(a, b, c) = \tau \ln\left(1 + \exp\left(\frac{a + b + c - \eta_{IJ}}{\tau}\right)\right) - \tau \ln\left(1 + \exp\left(\frac{a + b + c - \eta_{IJ} - 1}{\tau}\right)\right)$$
-  Validated under `ST-03`: restores active gradients $\|\nabla_S\| > 10^{-4}$ where hard ReLU yields exactly zero.
+  $$\phi_\tau(u) = \tau \ln\left(1 + \exp\left(\frac{u}{\tau}\right)\right) - \tau \ln\left(1 + \exp\left(\frac{u - 1}{\tau}\right)\right)$$
+  $$\frac{\partial \phi_\tau(u)}{\partial u} = \sigma\left(\frac{u}{\tau}\right) - \sigma\left(\frac{u - 1}{\tau}\right) > 0 \quad \forall u \in \mathbb{R}$$
 
 ### Audit Fix 4: Scale-Normalized ProbSum Against Asymptotic Graph Saturation
-- **Theoretical Flaw**: As edge count $M \to \infty$, the cumulative product $\prod_{e=1}^M (1 - \omega_e) \to 0$, forcing $A_{new}(I, J) \to 1.0$ for all cluster pairs and collapsing the coarse graph into an undifferentiated complete clique.
+- **Theoretical Flaw**: As edge count $M \to \infty$, the cumulative product $\prod_{e=1}^M (1 - \omega_e) \to 0$, forcing $A_{new}(I, J) \to 1.0$ and collapsing the graph into an undifferentiated complete clique.
 - **Mathematical Remedy**: Introduction of `M10-Nm` with **Mean-Field Normalization**:
   $$A_{new}^{MF}(I, J) = 1 - \exp\left( \frac{K^2}{M} \sum_{e \in E} \ln(1 - \omega_e(I, J) + \epsilon) \right)$$
-  Validated under `ST-05`: prevents collapse on graphs with $M > 7000$ edges, maintaining structured values in $[0.02, 0.95]$.
 
 ### Audit Fix 5: Log-Domain Extreme Parameter Stability for Schweizer-Sklar & Dombi
-- **Theoretical Flaw**: Computing $a^{-q}$ or $((1-a)/a)^\lambda$ in IEEE-754 `float32` produces `+inf` and `NaN` gradients whenever $q, \lambda \ge 45$ (since $0.02^{-45} \approx 10^{76}$, exceeding single-precision range).
-- **Mathematical Remedy**: Exact reformulation in the logarithmic domain:
+- **Theoretical Flaw**: Computing $a^{-q}$ or $((1-a)/a)^\lambda$ in IEEE-754 `float32` produces `+inf` and `NaN` gradients whenever $q, \lambda \ge 45$.
+- **Mathematical Remedy**: Exact reformulation in the logarithmic domain via $\text{LogSumExp}$:
   $$\ln\left(\sum_m \exp(-q \ln x_m)\right) = \text{LogSumExp}(-q \ln \mathbf{x})$$
-  $$\text{Dombi}(a, b, c) = \sigma\left( -\frac{1}{\lambda} \text{LogSumExp}\left( \lambda \ln\left( \frac{1-\mathbf{x}}{\mathbf{x}} \right) \right) \right)$$
-  Validated under `ST-04` at $q = \lambda = 45$: 100% finite forward and backward passes.
 
 ### Audit Fix 6: Matrix-Free Sparse MEX Decomposition for Bandler-Kohout
-- **Theoretical Flaw**: Computing Bandler-Kohout implications naively requires evaluating missing edges $\bar{A} = \mathbf{1}\mathbf{1}^T - A_{refl}$, which forces an $\mathcal{O}(N^2)$ dense matrix allocation and causes CUDA Out-Of-Memory on graphs with $N \ge 2500$.
+- **Theoretical Flaw**: Evaluating missing edges $\bar{A} = \mathbf{1}\mathbf{1}^T - A_{refl}$ naively forces an $\mathcal{O}(N^2)$ dense matrix allocation and causes CUDA OOM for $N \ge 2500$.
 - **Mathematical Remedy**: **Matrix-Free Minimum Excluded Rank (MEX)** theorem:
   $$\sup_{j: A_{ij}=0} (S_{jJ}) = \text{MEX}\left( \{S_{jJ} : (i, j) \in E\}, \text{Top-2}(S_{:, J}) \right)$$
-  Computes exact Bandler-Kohout reductions in $\mathcal{O}((M + N) K \log((M+N)K) + N K^2)$ without allocating a single byte for $\bar{A}$. Validated under `ST-07` on $N = 2500$ sparse graphs.
+  Computes exact Bandler-Kohout reductions in $\mathcal{O}((M + N) K \log((M+N)K) + N K^2)$ without allocating a single byte for $\bar{A}$.
 
 ---
 
 ## 5. Validation Suite: Analytical Jacobians & Invariants
 
 The mathematical integrity of Labflow is verified by three rigorous test suites:
-
-### Suite 1: Analytical Jacobian GradCheck (55/55 PASS)
-Every custom `torch.autograd.Function` is verified with double-precision finite differences:
-- `_DiffPoolSparseFn`, `_MinCutPoolSparseFn`, `_DMoNSparseFn`
-- `_ZadehRelationalSparseFn`, `_GoguenRelationalSparseFn`, `_LukasiewiczRelationalSparseFn`
-- `_HamacherRelationalSparseFn`, `_SchweizerSklarSparseFn`, `_DombiSparseFn`
-- `_BoltzmannSparseFn`, `_ProbSumSparseFn`, `_BandlerKohoutSparseFn`
-- `_COGFeaturePoolingFn`, `_BipolarFeaturePoolingFn`, `_ChoquetFeaturePoolingFn`
-
-$$\max \frac{\|\nabla_{\text{analytical}} - \nabla_{\text{finite-diff}}\|_2}{\|\nabla_{\text{analytical}}\|_2 + \|\nabla_{\text{finite-diff}}\|_2} < 10^{-5}$$
-
-### Suite 2: Two-Step Sparse vs Dense Equivalence (20/20 PASS)
-Confirms that the two-step sparse algorithms $\mathcal{O}(MK + NK^2)$ yield identical numerical outputs to naive dense tensor contractions $\mathcal{O}(N^2 K^2)$:
-$$\max |A_{new}^{\text{sparse}} - A_{new}^{\text{dense}}| \le 4.44 \times 10^{-16} \quad (\text{IEEE-754 Machine Epsilon})$$
-
-### Suite 3: Spectral & Topological Invariants (16/16 PASS)
-- **INV-01**: DiffPool Edge Mass Conservation Law $\sum A_{new} = \sum A$ and $[0, 1]$ scale breakdown ($\max A_{new} > 1$).
-- **INV-02**: MinCutPool zero-diagonal loop annihilation and spectral loss bounds $\mathcal{L}_{cut} \in [-1, 0]$, $\mathcal{L}_{orth} \in [0, \sqrt{2}]$.
-- **INV-03**: DMoN rank-1 Chung-Lu modularity equivalence $|Q_{\text{rank-1}} - Q_{\text{dense}}| < 10^{-12}$.
-- **INV-04**: Zadeh-Gödel idempotence and diagonal height identity $A_{new}(I, I) = \text{height}(S_{:, I})$.
-- **INV-05**: Zadeh-Gödel edge bottleneck gradient masking ($\|\nabla_S A_{new}\| = 0$ when $A_{ij} < \min(S_i, S_j)$).
-- **INV-06**: Goguen tropical shortest-path isomorphism $-\ln A_{new}(I, J) = \min_e (-\ln S_i - \ln A_{ij} - \ln S_j)$.
-- **INV-07**: Goguen Hebbian mutual reinforcement scaling ($\partial A_{new} / \partial S_i = A_{ij} S_j \ne 0$).
-- **INV-08**: Łukasiewicz exact mathematical sparsity theorem and lossless COO/CSR export.
-- **INV-09**: Hamacher-Einstein identity at $\gamma=1$ ($T_{H, 1} \equiv \text{Goguen}$) and monotonic decrease in $\gamma$.
-- **INV-10**: Schweizer-Sklar continuous continuum ($q \to 0^+ \implies \text{Goguen}$, $q \to \infty \implies \text{Zadeh}$, $p=1 \implies \text{Łukasiewicz}$).
-- **INV-11**: Boltzmann temperature limit $\tau_c \to 0^+ \implies \text{Goguen}$ and non-positive variance derivative $dA/d\tau_c \le 0$.
-- **INV-12**: ProbSum exact saturation of $m$ parallel bridges: $A_{new} = 1 - (1 - w)^m \in [0, 1]$.
-- **INV-13**: Bandler-Kohout (Reichenbach) De Morgan duality: $A_{new} = 1 - \text{Goguen}(1 - A_{refl})$.
-- **INV-14**: Bandler-Kohout exact clique pooling theorem: $A_{new}(I, I) = 1.0 \iff \text{supp}(S_{:, I})$ is a complete clique.
-- **INV-15**: COG feature pooling limit $m \to 1^+$ to weighted mean and translation equivariance $\text{COG}(H+c) = \text{COG}(H)+c$.
-- **INV-16**: Bipolar feature anti-symmetry $\text{Bipolar}(-H) = -\text{Bipolar}(H)$ and Choquet continuous Min-Mean-Max interpolation.
+- **Suite 1: Analytical Jacobian GradCheck (55/55 PASS)**: Verified with double-precision finite differences with relative error $< 10^{-5}$.
+- **Suite 2: Two-Step Sparse vs Dense Equivalence (20/20 PASS)**: Machine-zero discrepancy ($\le 4.44 \times 10^{-16}$).
+- **Suite 3: Spectral & Topological Invariants (16/16 PASS)**: Exact numerical verification of edge mass conservation, idempotence, tropical isomorphism, clique isolation theorems, and anti-symmetry.
 
 ---
 
-## 6. Experimental Benchmarks & Protocol
+## 6. Experimental Benchmarks: 7 Independent Domain Suites
 
-The empirical evaluation tests all 22 canonical configurations across five rigorous benchmarks:
+To prevent scientifically misleading aggregations, the evaluation framework splits testing into **7 decoupled domain-specific benchmark suites**:
 
-1. **Benchmark I: Stochastic Block Model (SBM) Community Detection & Jacobian Sparsity**
-   - Balanced SBM graph ($N=45$, $K=3$, $P_{in}=0.85$, $P_{out}=0.08$). Evaluates unsupervised community discovery (NMI, ARI, Modularity $Q$) and empirical density of the topological Jacobian $\partial A_{new} / \partial S$.
-2. **Benchmark II: Planted Clique Isolation & Motif Discovery**
-   - Graph with 2 planted 5-cliques and background Erdős–Rényi noise ($N=25$). Evaluates the capacity of the pooling layer to discover dense subgraphs without supervision (Internal Clique Density, Clique Recovery F1, and diagonal self-loop strength $A_{new}(I, I)$).
-3. **Benchmark III: Hierarchical Graph Classification (End-to-End GNN)**
-   - Synthetic graph collection ($B=32$ graphs, classes: Cycles vs Stars vs Bipartite). Evaluates representation learning in an end-to-end differentiable pipeline: $\text{GNN}_1 \to \text{GraphReductionLayer} \to \text{GNN}_2 \to \text{GlobalReadout} \to \text{MLP}$.
-4. **Benchmark IV: Multi-Scale & Real-World Network Evaluation**
-   - Evaluates performance on unbalanced noisy SBM ($N=60, K=4$) and the canonical real-world Zachary's Karate Club network ($N=34, K=2$).
-5. **Benchmark V: Asymptotic Computational Profiling on Large Sparse Graphs**
-   - Profiling of Forward + Backward runtime and peak memory across graph sizes $N \in \{150, 450, 1200, 2400\}$ with constant average degree $\langle d \rangle = 12$ without dense adjacency matrix allocation (`adj=None`). Fits the empirical complexity exponent $\alpha$ ($T \propto N^\alpha$).
+### 1. Community Detection & Homophily (`labflow.benchmarks.community`)
+- **Objective**: Evaluates unsupervised partition quality on balanced Stochastic Block Models ($N=45, K=3, P_{in}=0.85, P_{out}=0.08$) and real-world networks (Karate Club).
+- **Mathematical Metrics**:
+  - Normalized Mutual Information: $\text{NMI}(Y, \hat{Y}) = \frac{2 I(Y; \hat{Y})}{H(Y) + H(\hat{Y})}$;
+  - Adjusted Rand Index: $\text{ARI}(Y, \hat{Y})$;
+  - Newman-Girvan Modularity: $Q = \frac{1}{2M}\sum_{ij}\left(A_{ij} - \frac{d_i d_j}{2M}\right)\delta(c_i, c_j)$.
+
+### 2. Planted Clique Isolation & Motif Discovery (`labflow.benchmarks.clique_motif`)
+- **Objective**: Evaluates the mathematical capacity to isolate dense subgraphs (planted 5-cliques) embedded in background Erdős–Rényi noise.
+- **Mathematical Metrics**:
+  - Internal Clique Density: $\rho(C_k) = \frac{2 |E(C_k)|}{|C_k|(|C_k|-1)}$;
+  - Clique Recovery F1: $F1 = 2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}$;
+  - Diagonal Reflexivity: $A_{new}(I, I) = 1.0 \iff \text{supp}(S_{:, I}) \text{ is an exact clique}$.
+
+### 3. Topological Fidelity & Spectral Preservation (`labflow.benchmarks.topology_fidelity`)
+- **Objective**: Assesses structural and spectral distortion between original and reduced topologies.
+- **Mathematical Metrics**:
+  - Relative Spectral Laplacian Distance: $\Delta_\lambda = \frac{\|\lambda(L) - \lambda(L_{new})\|_2}{\|\lambda(L)\|_2}$;
+  - Link Reconstruction AUC & RMSE;
+  - De Luca-Termini Non-Probabilistic Fuzzy Entropy:
+    $$H_E(A_{new}) = -\frac{1}{K^2}\sum_{I=1}^K \sum_{J=1}^K \left[ A_{new}(I, J)\ln A_{new}(I, J) + (1 - A_{new}(I, J))\ln(1 - A_{new}(I, J)) \right]$$
+
+### 4. Hierarchical Graph Classification (`labflow.benchmarks.classification`)
+- **Objective**: Evaluates end-to-end representation learning in a multi-class graph classification pipeline:
+  $$\text{GNN}_1 \to \text{GraphReductionLayer} \to \text{GNN}_2 \to \text{GlobalMeanReadout} \to \text{MLP}$$
+- **Mathematical Metrics**: Cross-Entropy Loss $\mathcal{L}_{CE}$, Test Accuracy, Macro-F1.
+
+### 5. Gradient Dynamics & Numerical Health (`labflow.benchmarks.gradient_stability`)
+- **Objective**: Diagnoses backpropagation bottlenecks and gradient flow through pooling layers.
+- **Mathematical Metrics**:
+  - Dead Super-Edge Ratio: $\text{dead\_ratio} = \frac{1}{K^2}\sum_{I, J} \mathbf{1}\left(\|\nabla_{S} A_{new}(I, J)\| \le 10^{-7}\right)$;
+  - Active Topological Jacobian Density: $\frac{|\{(i, I) : |\partial A_{new}(I, J) / \partial S_{iI}| > 10^{-4}\}|}{N K}$;
+  - Parameter Gradient Finiteness: $\forall \theta: \text{isfinite}(\nabla_\theta) \land \neg\text{isnan}(\nabla_\theta)$.
+
+### 6. Computational Scalability & Memory Efficiency (`labflow.benchmarks.efficiency`)
+- **Objective**: Measures asymptotic execution speed and VRAM overhead across sparse graph sizes $N \in \{150, 450, 1200, 2400\}$ with constant degree $\langle d \rangle = 12$ without dense matrix materialization (`adj=None`).
+- **Mathematical Metrics**: Runtime (ms), Peak Memory (MB), Empirical Scaling Exponent $\alpha$ in $T(N) = c \cdot N^\alpha$.
+
+### 7. Component-Level Ablation (`labflow.benchmarks.ablation`)
+- **Objective**: Quantifies the isolated contribution of each component within the SRC paradigm:
+  $$\Delta_{\text{metric}} = \text{Score}(\text{Variant}) - \text{Score}(\text{Baseline})$$
 
 ---
 
@@ -300,10 +326,8 @@ The empirical evaluation tests all 22 canonical configurations across five rigor
 
 ### Consolidated Multi-Criteria Leaderboard
 
-All methods are ranked by a **Composite Score** that integrates Community Detection (NMI/ARI/Q), Topological Fidelity (Conductance/Link AUC/Unit interval), Clique Isolation (Density/F1), Graph Classification Accuracy, Gradient Stability (absence of Dead Super-Edges), and Asymptotic Speed:
-
 | Rank | Code | Canonical Key | Pareto | Composite | Comm. Score | Topo. Score | Clique F1 | GNN Test Acc | Grad Health | Large-N Time (ms) | Scaling Exponent $\alpha$ | Dead Edges | Recommended Domain |
-| :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| :---: | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **#1** | `M11B` | `bk_kleene_dienes` | **★ YES** | **0.763** | 0.691 | 0.683 | **1.000** | 68.8% | 0.924 | 15.01 ms | 0.71 | 0% | Dense clique & motif discovery |
 | **#2** | `M10-Nm`| `probsum_norm` | — | **0.761** | 0.688 | **0.736** | 0.928 | 68.8% | 0.926 | 15.63 ms | 0.89 | 0% | Large-scale parallel-path accumulation |
 | **#3** | `M13A` | `goguen_bipolar` | **★ YES** | **0.760** | 0.637 | 0.703 | 0.683 | **87.5%** | 0.922 | 5.42 ms | **0.40** | 0% | Hierarchical graph classification |
@@ -329,6 +353,18 @@ All methods are ranked by a **Composite Score** that integrates Community Detect
 
 ---
 
+### Domain-Specific Scientific Champions
+
+| Scientific Benchmark Test | Champion Code | Canonical Key | Primary Metric Value | Decisive Theoretical Advantage |
+| :--- | :---: | :--- | :---: | :--- |
+| **Planted Clique Isolation** | `M11B` | `bk_kleene_dienes` | **F1 = 1.000, $\rho = 1.000$** | Universal quantifier $\forall i, j$ penalizes missing internal edges |
+| **Hierarchical Classification** | `M13A` | `goguen_bipolar` | **Test Accuracy = 87.5%** | Orthogonal conic splitting $H = H^+ - H^-$ eliminates feature cancellation |
+| **Topological Reconstruction**| `M10-Nm`| `probsum_norm` | **Link AUC = 0.831** | Mean-Field scaling prevents saturation collapse ($A_{new} \to 1$) |
+| **Sparse Gradient Dynamics** | `M6-Sm` | `lukasiewicz_smooth`| **Dead Edges = 0.0%** | $C^\infty$ Softplus window ensures active gradients everywhere |
+| **Ultra-Low Latency Spectral Cut**| `M2` | `mincut` | **Runtime = 4.50 ms** | Minimalist spectral trace contraction |
+
+---
+
 ### Pareto Frontier & Efficiency Analysis
 
 The 2D Pareto frontier evaluates trade-offs between **Reduction Quality Index** and **Runtime on Large Graphs ($N=2400$)**:
@@ -336,7 +372,6 @@ The 2D Pareto frontier evaluates trade-offs between **Reduction Quality Index** 
   1. `mincut` (`M2`): Fastest execution (**4.50 ms**), ideal when computational throughput is paramount.
   2. `goguen_bipolar` (`M13A`): Outstanding balance (**5.42 ms**, quality **0.751**, top classification accuracy **87.5%**).
   3. `bk_kleene_dienes` (`M11B`): Highest overall quality index (**0.776**, runtime **15.01 ms**), dominating all methods in structural motif and clique isolation.
-- **Empirical Complexity**: Methods equipped with true sparse $\mathcal{O}(MK + NK^2)$ execution achieve empirical scaling exponents $\alpha \in [0.40, 0.71]$, demonstrating sub-quadratic runtime with zero $N \times N$ allocations.
 
 ---
 
@@ -345,38 +380,33 @@ The 2D Pareto frontier evaluates trade-offs between **Reduction Quality Index** 
 #### 1. SBM Community Detection & Topological Jacobian Sparsity
 ![SBM and Jacobian Comparison](reports/figures/sbm_and_jacobian_comparison.png)
 
-- **Top Subplot**: Community discovery quality on SBM benchmark ($N=45, K=3$). Classical modularity partitioners (`dmon`, `diffpool`) and fuzzy relational methods (`goguen`, `zadeh`, `hamacher`, `einstein`, `dombi`) consistently recover ground-truth communities with $\text{NMI} \ge 0.67$ and modularity $Q \approx 0.34$.
-- **Bottom Subplot**: Empirical density of the topological Jacobian $\partial A_{new} / \partial S$. While bilinear DiffPool exhibits 100% dense Jacobian connectivity ($\mathcal{O}(N)$ nodes active per super-edge), fuzzy relational operators concentrate gradients exclusively along critical bottleneck edges (8–18% active nodes), preventing gradient dilution in deep networks.
-
----
-
 #### 2. Planted Clique Isolation & End-to-End Graph Classification
 ![Clique and Classification](reports/figures/clique_and_classification.png)
-
-- **Left Subplot (Planted Cliques)**: Bandler-Kohout implicative operators (`bk_kleene_dienes` `M11B`) achieve **100% F1 clique recovery** and internal density $1.000$, whereas classical bilinear pooling (`diffpool`) scores $< 0.40$. The universal quantifier $\forall i, j$ inherently penalizes missing internal edges, transforming diagonal entries $A_{new}(I, I)$ into exact clique indicators.
-- **Right Subplot (Graph Classification)**: Bipolar feature pooling (`goguen_bipolar` `M13A`) achieves the highest test accuracy (**87.5%**), outperforming standard mean readouts by separating positive and negative feature responses.
-
----
 
 #### 3. Multi-Criteria Evaluation Matrix
 ![Multi-Criteria Heatmap](reports/figures/multi_criteria_heatmap.png)
 
-- The 7-dimensional criteria heatmap (Communities, Topology & Spectrum, Clique Isolation, GNN Classification, Gradient Health, Efficiency, and Composite Index) reveals distinct operational profiles.
-- Bandler-Kohout models excel in motif and clique metrics, classical methods (`dmon`, `mincut`) lead in partition modularity and speed, while smooth and normalized relational methods (`probsum_norm`, `lukasiewicz_smooth`) deliver uniformly high scores across all criteria without weaknesses.
-
----
-
 #### 4. Asymptotic Scaling & 2D Pareto-Optimal Frontier
 ![Scaling and Pareto Frontier](reports/figures/scaling_and_pareto.png)
 
-- **Left Subplot (Log-Log Scaling)**: Runtimes across sparse graphs $N \in [150, 2400]$ demonstrate true sparse execution. Operators with matrix-free two-step decomposition scale gracefully with $\alpha < 1.0$, whereas unscaled Boltzmann aggregations experience steeper slopes ($\alpha \approx 1.14$).
-- **Right Subplot (Pareto Frontier)**: The dashed red line delineates the Pareto-optimal frontier, highlighting `mincut` for ultra-low latency, `goguen_bipolar` for balanced representation learning, and `bk_kleene_dienes` for maximum structural fidelity.
+---
+
+## 8. Interactive Jupyter Experiment Journals
+
+For interactive exploration, pedagogical inspection, and reproduction of every empirical figure and theorem, Labflow provides dedicated interactive Jupyter Notebooks:
+
+- **[walkthrough_experiments_en.ipynb](walkthrough_experiments_en.ipynb)** (English Edition):
+  Complete step-by-step experiment walkthrough with rigorous $\LaTeX$ formulations, PyTorch forward/backward executions, and matplotlib/seaborn figures.
+- **[walkthrough_experiments_ua.ipynb](walkthrough_experiments_ua.ipynb)** (Ukrainian Edition):
+  Повноцінний україномовний інтерактивний журнал дослідження для навчального та наукового процесу.
+- **[walkthrough_experiments.ipynb](walkthrough_experiments.ipynb)**:
+  Default international edition (English).
+
+Both versions are also mirrored inside the [`notebooks/`](notebooks/) directory.
 
 ---
 
-## 8. Practical Selection Guide & Decision Taxonomy
-
-To guide practitioners in selecting the optimal reduction layer for their GNN architecture, Labflow provides the following decision taxonomy:
+## 9. Practical Selection Guide & Decision Taxonomy
 
 ```
                         What is your primary architectural objective?
@@ -398,15 +428,15 @@ Smooth Lukasiewicz (M6-Sm)                                              Scale-No
 - Differentiable softplus window                                        - Mean-Field logarithmic scaling
 ```
 
-1. **For Motif, Clique, and Core Subgraph Discovery**: Use **`bk_kleene_dienes` (`M11B`)**. Its implicative definition enforces universal quantification ($\forall i \in I, \forall j \in I: (i, j) \in E$), producing $A_{new}(I, I) = 1.0$ if and only if super-node $I$ is an exact clique.
-2. **For Hierarchical Graph Classification**: Use **`goguen_bipolar` (`M13A`)**. By splitting feature embeddings into orthogonal positive and negative cones before supremal aggregation, it prevents constructive/destructive feature cancellation and achieves top test accuracy (87.5%).
-3. **For Deep Multi-Layer Hierarchical GNNs**: Use **`lukasiewicz_smooth` (`M6-Sm`)**. It provides exact bounded $[0, 1]$ edge weights while maintaining $C^\infty$ gradients everywhere, completely avoiding the *Dead Super-Edges* problem of standard ReLU clipping.
-4. **For Massive Graphs with Dense Parallel Bridges**: Use **`probsum_norm` (`M10-Nm`)**. The mean-field logarithmic scaling prevents topological saturation ($A_{new} \to 1.0$) across thousands of parallel paths.
-5. **For Ultra-Fast Spectral Partitioning**: Use **`mincut` (`M2`)** or **`dmon` (`M3`)**. Both deliver $< 5.6\text{ ms}$ latency on $N=2400$ graphs with strict non-overlapping community allocation.
+1. **For Motif, Clique, and Core Subgraph Discovery**: Use **`bk_kleene_dienes` (`M11B`)**.
+2. **For Hierarchical Graph Classification**: Use **`goguen_bipolar` (`M13A`)**.
+3. **For Deep Multi-Layer Hierarchical GNNs**: Use **`lukasiewicz_smooth` (`M6-Sm`)**.
+4. **For Massive Graphs with Dense Parallel Bridges**: Use **`probsum_norm` (`M10-Nm`)**.
+5. **For Ultra-Fast Spectral Partitioning**: Use **`mincut` (`M2`)** or **`dmon` (`M3`)**.
 
 ---
 
-## 9. Repository Structure & Reproduction Commands
+## 10. Repository Structure & Reproduction Commands
 
 ### Repository Layout
 
@@ -419,30 +449,43 @@ fuzzy-pool-resaerch/
 │   ├── fuzzy_features/             # Division IV: COG Defuzzification, Bipolar, Choquet Integrals
 │   ├── analytics/                  # 24-metric evaluation, profiler, stability audit, multi-criteria comparator
 │   ├── validation/                 # Analytical GradCheck, sparse equivalence, 16 invariants
-│   ├── benchmarks/                 # SBM, Planted Cliques, Graph Classification runners
+│   ├── benchmarks/                 # 7 independent domain benchmark runners
+│   │   ├── community.py            # SBM & real-world community discovery
+│   │   ├── clique_motif.py         # Planted clique & structural motif isolation
+│   │   ├── topology_fidelity.py    # Spectral Laplacian distance & link reconstruction
+│   │   ├── classification.py       # End-to-end hierarchical graph classification
+│   │   ├── gradient_stability.py   # Dead super-edges & Jacobian density analysis
+│   │   ├── efficiency.py           # Large sparse graph profiling & memory benchmarking
+│   │   └── ablation.py             # Component-level SRC ablation studies
 │   ├── datasets/                   # Synthetic SBM, Planted Cliques, Karate Club generators
 │   ├── reporting/                  # Diagnostic plot generators & report exporters
 │   ├── gnn.py                      # True sparse GraphSAGE encoder backbone
 │   ├── memberships.py              # Softmax, Anisotropic Sigmoid, Gaussian RBF memberships
 │   ├── composite.py                # GraphReductionLayer & 22 canonical method specifications
 │   └── cli.py                      # Command-line interface entry point
+├── notebooks/                      # Mirrored Jupyter notebooks
+│   ├── walkthrough_experiments_en.ipynb
+│   ├── walkthrough_experiments_ua.ipynb
+│   └── walkthrough_experiments.ipynb
 ├── reports/                        # Research artifacts & outputs
 │   ├── figures/                    # High-resolution publication-quality PNG figures
 │   │   ├── sbm_and_jacobian_comparison.png
 │   │   ├── clique_and_classification.png
 │   │   ├── multi_criteria_heatmap.png
+│   │   ├── domain_specific_benchmarks.png
 │   │   └── scaling_and_pareto.png
 │   ├── reducer_leaderboard.csv     # Complete 22-method multi-criteria CSV dataset
 │   ├── analytics_results.json      # Structured JSON metrics & profiling data
 │   └── labflow_results.json        # GradCheck & invariant verification data
-├── tests/                          # Automated Pytest suite (51 comprehensive unit/integration tests)
+├── tests/                          # Automated Pytest suite (60 unit & integration tests)
 ├── pyproject.toml                  # Package configuration & build specification
-└── README.md                       # Complete research paper & project documentation
+├── walkthrough_experiments_en.ipynb# Interactive experiment journal (English)
+├── walkthrough_experiments_ua.ipynb# Interactive experiment journal (Ukrainian)
+├── walkthrough_experiments.ipynb   # Interactive experiment journal (Default)
+└── README.md                       # Comprehensive research paper & documentation
 ```
 
 ### Reproduction Commands
-
-All results, mathematical proofs, stress tests, benchmarks, and diagnostic plots are 100% reproducible via the `labflow` CLI:
 
 ```bash
 # 1. List all 22 canonical reduction method configurations
@@ -457,18 +500,26 @@ python -m labflow.cli audit-check
 # 4. Profile asymptotic runtime & memory scaling on large sparse graphs (adj=None)
 python -m labflow.cli profile --sizes 150,450,1200,2400 --repeats 3
 
-# 5. Execute full multi-criteria analytics suite (Leaderboard CSV, JSON, and Heatmap/Pareto Figures)
+# 5. Execute dedicated domain benchmark suites
+python -m labflow.cli benchmark --test clique           # Planted clique isolation
+python -m labflow.cli benchmark --test classification   # Hierarchical graph classification
+python -m labflow.cli benchmark --test topology         # Spectral Laplacian & link reconstruction
+python -m labflow.cli benchmark --test community        # SBM community detection
+python -m labflow.cli benchmark --test gradient         # Dead super-edges & Jacobian health
+python -m labflow.cli benchmark --test efficiency       # Asymptotic scaling profiler
+python -m labflow.cli benchmark --test ablation         # SRC component ablation
+python -m labflow.cli benchmark --test all              # All 7 domain benchmarks
+
+# 6. Execute full multi-criteria analytics suite & generate figures
 python -m labflow.cli compare --output-dir reports
 
-# 6. Run the complete Pytest verification suite (51 tests)
+# 7. Run the complete Pytest verification suite (60 tests, 100% pass rate)
 pytest tests/ -v
 ```
 
 ---
 
-## 10. Citation & Academic Reference
-
-If you utilize the Labflow framework, analytical Jacobians, or benchmark results in your research, please cite:
+## 11. Citation & Academic Reference
 
 ```bibtex
 @article{labflow2026fuzzypool,

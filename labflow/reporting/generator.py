@@ -452,7 +452,34 @@ def write_analytics_reports(
     # 2. Multi-Criteria Leaderboard
     lines.extend(
         [
-            "## 2. Consolidated Multi-Criteria Ranking and Pareto Frontier",
+            "## 2. Multi-Criteria Ranking & Domain-Specific Benchmark Tests",
+            "",
+            "To achieve accurate and scientifically sound evaluation, the composite evaluation is separated into dedicated tests with domain-specific metrics:",
+            "",
+        ]
+    )
+
+    if analytics.domain_winners:
+        w = analytics.domain_winners
+        lines.extend(
+            [
+                "### Domain-Specific Scientific Champions (Independent Benchmark Tests)",
+                "",
+                "| Scientific Benchmark Test | Champion Code | Method Key | Title | Primary Metric Value |",
+                "|---|---|---|---|---|",
+                f"| **I. Community Detection & Partitioning** | `{w['community'].method_code}` | `{w['community'].method_key}` | {w['community'].title} | Comm Score: `{w['community'].community_score:.3f}` (NMI: `{w['community'].mean_nmi:.3f}`) |",
+                f"| **II. Planted Clique & Motif Isolation** | `{w['clique'].method_code}` | `{w['clique'].method_key}` | {w['clique'].title} | Clique Score: `{w['clique'].clique_isolation_score:.3f}` |",
+                f"| **III. Topological & Spectral Fidelity** | `{w['topology'].method_code}` | `{w['topology'].method_key}` | {w['topology'].title} | Topo Score: `{w['topology'].topology_spectral_score:.3f}` (Link AUC: `{w['topology'].mean_link_auc:.3f}`) |",
+                f"| **IV. Hierarchical GNN Classification** | `{w['classification'].method_code}` | `{w['classification'].method_key}` | {w['classification'].title} | Test Accuracy: `{w['classification'].classification_score:.1%}` |",
+                f"| **V. Gradient Dynamics & Optimization** | `{w['gradient'].method_code}` | `{w['gradient'].method_key}` | {w['gradient'].title} | Grad Health: `{w['gradient'].gradient_stability_score:.3f}` |",
+                f"| **VI. Asymptotic Efficiency & Scaling** | `{w['efficiency'].method_code}` | `{w['efficiency'].method_key}` | {w['efficiency'].title} | Runtime: `{w['efficiency'].ms_large_graph:.2f} ms` (alpha: `{w['efficiency'].empirical_scaling_exp:.2f}`) |",
+                "",
+            ]
+        )
+
+    lines.extend(
+        [
+            "### Consolidated Overview (Multi-Criteria & Pareto Frontier)",
             "",
             "| Rank | Code | Method | Pareto | Composite | Communities | Topology | Cliques | GNN Acc | Gradient | Speed | Mean NMI | Dead Edges | Max-N Time (ms) | alpha_emp |",
             "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",

@@ -296,6 +296,56 @@ def compute_link_reconstruction_metrics(
     return rmse, float(np.clip(auc, 0.0, 1.0))
 
 
+def compute_deluca_termini_entropy(s: Tensor) -> float:
+    """De Luca-Termini non-probabilistic fuzzy entropy in [0, 1]."""
+    s_clamped = s.clamp(1e-12, 1.0 - 1e-12)
+    return float(
+        (-(s_clamped * torch.log(s_clamped) + (1.0 - s_clamped) * torch.log(1.0 - s_clamped)).mean().item())
+        / math.log(2.0)
+    )
+
+
+def compute_deluca_termini_and_bezdek(s: Tensor) -> tuple[float, float]:
+    """Compute (deluca_termini_entropy, bezdek_partition_coefficient)."""
+    dlt = compute_deluca_termini_entropy(s)
+    s_tilde = s / (s.sum(dim=1, keepdim=True) + 1e-12)
+    bezdek_pc = float((s_tilde * s_tilde).sum(dim=1).mean().item())
+    return dlt, bezdek_pc
+
+
+def compute_link_reconstruction_auc_rmse(
+    adj: Tensor, a_new: Tensor, s: Tensor
+) -> tuple[float, float]:
+    """Link reconstruction (AUC, RMSE) from dense adjacency, super-adjacency, and membership."""
+    from labflow.types import dense_to_sparse
+
+    edge_index, edge_weight = dense_to_sparse(adj, threshold=0.0)
+    g = GraphData(
+        x=torch.zeros((adj.shape[0], 1), dtype=adj.dtype, device=adj.device),
+        adj=adj,
+        edge_index=edge_index,
+        edge_weight=edge_weight,
+    )
+    rmse, auc = compute_link_reconstruction_metrics(g, s, a_new)
+    return auc, rmse
+
+
+def check_parameter_gradient_finite(layer: GraphReductionLayer) -> bool:
+    """Check that all trainable parameters in layer have finite (non-NaN, non-Inf) gradients."""
+    params = [p for p in layer.parameters() if p.requires_grad]
+    if not params:
+        return True
+    return all(p.grad is not None and bool(torch.isfinite(p.grad).all()) for p in params)
+
+
+def measure_empirical_jacobian_density_and_dead_edges(
+    layer: GraphReductionLayer, graph: GraphData
+) -> tuple[float, float]:
+    """Measure empirical Jacobian active ratio and dead superedge fraction."""
+    density, dead, _ = compute_jacobian_and_dead_superedges(layer, graph)
+    return density, dead
+
+
 def compute_feature_reconstruction_r2(target_feat: Tensor, s: Tensor, x_new: Tensor) -> float:
     """Optimal linear ridge-regularized R^2 reconstructing node embeddings H from S_tilde X_new."""
     h_np = target_feat.detach().cpu().numpy().astype(np.float64)
