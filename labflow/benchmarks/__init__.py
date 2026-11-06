@@ -8,6 +8,7 @@ Separates composite evaluation into dedicated, scientifically grounded benchmark
 - Gradient Dynamics & Optimization Health Benchmark
 - Computational Efficiency & Asymptotic Scaling Benchmark
 - Component-Level Modular Ablation Benchmark
+- Real-World Multi-Domain Graph Classification Benchmark (TUDataset & OGB ogbg-molhiv)
 """
 
 from labflow.benchmarks.ablation import (
@@ -36,6 +37,14 @@ from labflow.benchmarks.gradient_stability import (
     GradientStabilityBenchmarkRecord,
     run_gradient_stability_benchmark,
 )
+from labflow.benchmarks.real_world import (
+    REPRESENTATIVE_REALWORLD_METHOD_KEYS,
+    RealWorldBenchmarkRecord,
+    RealWorldBenchmarkSuiteResult,
+    RealWorldMethodSummary,
+    evaluate_methods_on_real_dataset,
+    run_real_world_benchmark_suite,
+)
 from labflow.benchmarks.runner import (
     CliqueBenchmarkRecord,
     SBMBenchmarkRecord,
@@ -61,6 +70,10 @@ __all__ = [
     "EfficiencyBenchmarkRecord",
     "ComponentAblationRecord",
     "SeparateBenchmarkSuiteResult",
+    "RealWorldBenchmarkRecord",
+    "RealWorldMethodSummary",
+    "RealWorldBenchmarkSuiteResult",
+    "REPRESENTATIVE_REALWORLD_METHOD_KEYS",
     # Modular Benchmark Test Runners
     "run_community_detection_benchmark",
     "run_clique_motif_benchmark",
@@ -72,6 +85,8 @@ __all__ = [
     "run_feature_pooling_ablation",
     "run_membership_ablation",
     "run_all_separate_benchmarks",
+    "evaluate_methods_on_real_dataset",
+    "run_real_world_benchmark_suite",
     # Legacy runners
     "run_sbm_community_benchmark",
     "run_planted_clique_benchmark",

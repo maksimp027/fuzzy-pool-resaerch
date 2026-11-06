@@ -20,11 +20,16 @@ from labflow.benchmarks import (
     run_gradient_stability_benchmark,
     run_graph_classification_benchmark,
     run_planted_clique_benchmark,
+    run_real_world_benchmark_suite,
     run_sbm_community_benchmark,
     run_topology_fidelity_benchmark,
 )
 from labflow.composite import CANONICAL_METHOD_SPECS
-from labflow.reporting import write_analytics_reports, write_labflow_reports
+from labflow.reporting import (
+    write_analytics_reports,
+    write_labflow_reports,
+    write_real_world_reports,
+)
 from labflow.validation import (
     run_full_gradcheck_suite,
     run_invariants_suite,
@@ -229,6 +234,9 @@ def _cmd_benchmark(
                 f"  [{r.component_type:<12}] {r.variant_name:<14} -> {r.metric_name}={r.metric_value:.3f} (delta={r.isolated_delta:+.3f})"
             )
 
+    if test == "real-world":
+        return _cmd_real_world(output_dir=output_dir, epochs=cls_epochs)
+
     if test == "all":
         sbm_legacy = run_sbm_community_benchmark(epochs=min(sbm_epochs, 25))
         clq_legacy = run_planted_clique_benchmark(epochs=min(clique_epochs, 35))
@@ -240,6 +248,45 @@ def _cmd_benchmark(
             cls_records=cls_legacy,
         )
         print(f"\nBenchmark reports and figures saved to: {paths['markdown']}")
+    return 0
+
+
+def _cmd_real_world(
+    output_dir: Path,
+    epochs: int = 16,
+    datasets_csv: Optional[str] = None,
+    all_methods: bool = False,
+) -> int:
+    print("=== LABFLOW REAL-WORLD BENCHMARK: 10 DATASETS (TUDataset & OGB ogbg-molhiv) ===")
+    ds_list = (
+        [tok.strip() for tok in datasets_csv.split(",") if tok.strip()]
+        if datasets_csv
+        else None
+    )
+    m_keys = "all" if all_methods else None
+    suite = run_real_world_benchmark_suite(
+        dataset_names=ds_list,
+        method_keys=m_keys,
+        epochs=epochs,
+        verbose=True,
+    )
+    print("\n[Cross-Dataset Real-World Leaderboard]")
+    print(
+        f"{'Rank':<5} {'Code':<8} {'Key':<21} {'MeanAcc':<9} {'MacroF1':<9} "
+        f"{'MeanAUC':<9} {'AvgRank':<8} {'Wins':<6} {'BioChem':<9} {'Social':<9} {'MolHIV-AUC'}"
+    )
+    print("-" * 110)
+    for m in suite.method_leaderboard:
+        print(
+            f"#{m.rank:<4} {m.method_code:<8} {m.method_key:<21} {m.mean_test_acc:<9.1%} "
+            f"{m.mean_macro_f1:<9.3f} {m.mean_roc_auc:<9.3f} {m.mean_rank:<8.2f} "
+            f"{m.datasets_won_or_tied:<6d} {m.bio_chem_mean_acc:<9.1%} "
+            f"{m.social_mean_acc:<9.1%} {m.ogb_molhiv_auc:.3f}"
+        )
+    paths = write_real_world_reports(output_dir=output_dir, suite=suite)
+    print("\n[Generated Real-World Research Artifacts]")
+    for k_name, p in paths.items():
+        print(f"  - {k_name}: {p}")
     return 0
 
 
@@ -327,9 +374,18 @@ def build_parser() -> argparse.ArgumentParser:
         "--test",
         type=str,
         default="all",
-        choices=["all", "community", "clique", "topology", "classification", "gradient", "efficiency", "ablation"],
+        choices=["all", "community", "clique", "topology", "classification", "gradient", "efficiency", "ablation", "real-world"],
         help="Select specific benchmark test to run (splits composite into independent tests)",
     )
+
+    p_rw = sub.add_parser(
+        "real-world",
+        help="Run real-world multi-domain benchmark on 10 datasets (PROTEINS, DD, NCI1, NCI109, ENZYMES, IMDB-B, IMDB-M, COLLAB, REDDIT-B, ogbg-molhiv)",
+    )
+    p_rw.add_argument("--output-dir", type=Path, default=Path("reports"))
+    p_rw.add_argument("--epochs", type=int, default=16)
+    p_rw.add_argument("--datasets", type=str, default=None, help="Comma-separated dataset names (default: all 10)")
+    p_rw.add_argument("--all-methods", action="store_true", help="Evaluate all 22 canonical methods instead of 13 representative methods")
 
     p_all = sub.add_parser("run-all", help="Complete Labflow cycle: mathematical validation + benchmarks + reports & plots")
     p_all.add_argument("--output-dir", type=Path, default=Path("reports"))
@@ -373,6 +429,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             args.clique_epochs,
             args.cls_epochs,
             test=args.test,
+        )
+    if args.command == "real-world":
+        return _cmd_real_world(
+            output_dir=args.output_dir,
+            epochs=args.epochs,
+            datasets_csv=args.datasets,
+            all_methods=args.all_methods,
         )
     if args.command == "run-all":
         return _cmd_run_all(args.output_dir, args.sbm_epochs, args.clique_epochs, args.cls_epochs)

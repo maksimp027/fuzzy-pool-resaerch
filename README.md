@@ -436,6 +436,29 @@ Smooth Lukasiewicz (M6-Sm)                                              Scale-No
 
 ---
 
+## 9.5. Real-World Multi-Domain Graph Classification Benchmarks (TUDataset & OGB)
+
+To validate the mathematical and synthetic findings on real-world empirical data, Labflow includes a dedicated loader (`labflow/datasets/real_world.py`) and benchmark suite (`labflow/benchmarks/real_world.py`) evaluating **13 representative graph reduction methods** across **10 real-world benchmark datasets** spanning 6 scientific domains:
+
+| Dataset | Domain | Task | Total Graphs | Sampled (Train/Test) | Classes $C$ | Features $F$ | Avg $\bar{N}$ | Avg $\bar{M}$ | Champion | Test Acc | ROC-AUC |
+|---|---|---|---:|---:|---:|---:|---:|---:|---|---:|---:|
+| **PROTEINS** | Bioinformatics | Enzyme vs Non-Enzyme | `1113` | `200` (`156`/`44`) | `2` | `22` | `35.5` | `132.1` | **`M1` (`diffpool`)** | **75.0%** | `0.748` |
+| **DD (D&D)** | Bioinformatics | Large Protein Structures | `1178` | `140` (`110`/`30`) | `2` | `82` | `240.7` | `1197.0` | **`M13A` (`goguen_bipolar`)** | **70.0%** | **0.833** |
+| **NCI1** | Cheminformatics | Anti-Cancer Screen (NSCLC) | `4110` | `220` (`172`/`48`) | `2` | `55` | `30.7` | `66.4` | **`M2` (`mincut`)** | **64.6%** | `0.674` |
+| **NCI109** | Cheminformatics | Anti-Cancer Screen (Ovarian) | `4127` | `220` (`172`/`48`) | `2` | `56` | `29.3` | `63.5` | **`M11B` (`bk_kleene_dienes`)** | **70.8%** | `0.672` |
+| **ENZYMES** | Bioinformatics | 6 EC Enzyme Classes | `600` | `240` (`186`/`54`) | `6` | `39` | `32.7` | `124.0` | **`M1` / `M11B`** | **53.7%** | **0.777** |
+| **IMDB-BINARY** | Social Networks | Actor Ego-Networks (2 genres) | `1000` | `200` (`156`/`44`) | `2` | `18` | `20.8` | `211.3` | **`M5` (`goguen`)** | **72.7%** | **0.779** |
+| **IMDB-MULTI** | Social Networks | Actor Ego-Networks (3 genres) | `1500` | `210` (`165`/`45`) | `3` | `18` | `12.7` | `135.6` | **`M6-Sm` (`lukasiewicz_smooth`)** | **48.9%** | `0.693` |
+| **COLLAB** | Large Social Graphs | Scientific Collaborations | `5000` | `150` (`117`/`33`) | `3` | `18` | `66.0` | `3773.6` | **`M4` (`zadeh`) / `M6-Sm`** | **63.6%** | **0.785** |
+| **REDDIT-BINARY** | Large Social Graphs | Online Reddit Discussions | `2000` | `140` (`109`/`31`) | `2` | `18` | `239.2` | `564.9` | **`M6-Sm` (`lukasiewicz_smooth`)** | **87.1%** | **0.937** |
+| **ogbg-molhiv** | Molecular OGB | HIV Replication Inhibition | `41127` | `240` (`187`/`53`) | `2` | `27` | `29.4` | `63.1` | **`M1` (`diffpool`)** | **83.0%** | **0.850** |
+
+![Real-World Multi-Domain Benchmarks](reports/figures/real_world_benchmarks.png)
+
+Full per-dataset tables and cross-dataset rankings are available in [`reports/real_world_benchmark_report.md`](reports/real_world_benchmark_report.md) and [`reports/real_world_leaderboard.csv`](reports/real_world_leaderboard.csv).
+
+---
+
 ## 10. Repository Structure & Reproduction Commands
 
 ### Repository Layout
@@ -513,20 +536,10 @@ python -m labflow.cli benchmark --test all              # All 7 domain benchmark
 # 6. Execute full multi-criteria analytics suite & generate figures
 python -m labflow.cli compare --output-dir reports
 
-# 7. Run the complete Pytest verification suite (60 tests, 100% pass rate)
+# 7. Execute real-world multi-domain benchmark on all 10 TUDataset & OGB datasets
+python -m labflow.cli real-world --output-dir reports --epochs 12
+
+# 8. Run the complete Pytest verification suite (68 tests, 100% pass rate)
 pytest tests/ -v
 ```
 
----
-
-## 11. Citation & Academic Reference
-
-```bibtex
-@article{labflow2026fuzzypool,
-  title={Fuzzy-Pool Labflow: Foundations, Analytical Jacobians, and Comparative Analysis of Graph Reduction Methods},
-  author={Labflow Research Team},
-  journal={Advanced Agentic Graph Learning Research},
-  year={2026},
-  url={https://github.com/maksimp027/fuzzy-pool-resaerch}
-}
-```
